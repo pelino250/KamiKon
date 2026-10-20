@@ -49,14 +49,20 @@ through the deployment platform rather than committing a `.env` file.
 The deployment check warns about HSTS subdomain inclusion and preload; enable these
 only when all subdomains are HTTPS-only and the domain meets preload requirements.
 
-## Planned Repository Layout
+## Repository Layout
+
+The layout is flat: the Django project and apps live at the repository root.
 
 ```text
 .github/            Issue/PR templates, CODEOWNERS, workflows
-backend/            Django + DRF + Celery
-mobile_flutter/     Phase 3: Flutter app
-frontend_spa/       Phase 4: React or Angular
-infra/              Docker Compose, Nginx, Terraform, Prometheus/Grafana
-docs/               Design, architecture and API specs
+kamikon/            Django project package (settings, URLs, ASGI/WSGI)
+apps/               Django apps (accounts, events, tickets, ...)
+tests/              Test suite
+design_docs/        Design and architecture notes
+docs/               Agent config (docs/agents) and ADRs (docs/adr)
 scripts/            GitHub project automation
+GLOSSARY.md         Domain vocabulary
 ```
+
+Later phases add `mobile_flutter/` (Flutter app), `frontend_spa/` (React or Angular) and
+deployment files (Dockerfile, Docker Compose) at the root when they are built.

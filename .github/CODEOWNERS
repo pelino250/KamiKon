@@ -3,7 +3,7 @@
 # The last matching pattern wins, so the general rule comes first.
 #
 # Rotate in this sprint's "DevOps Champion" and track leads by adding their
-# GitHub usernames next to the paths below, e.g.  /infra/  @pelino250 @student-a
+# GitHub usernames next to the paths below, e.g.  /apps/  @pelino250 @student-a
 
 # Default owner for everything
 *                       @pelino250
@@ -12,20 +12,17 @@
 /.github/               @pelino250
 /scripts/               @pelino250
 
-# Backend: Django + DRF + Celery (Sprints 0–5)
-/backend/               @pelino250
+# Backend: Django (Sprints 0–5)
+/kamikon/               @pelino250
+/apps/                  @pelino250
+/tests/                 @pelino250
 
-# DevOps & Infra: Docker, Compose, Nginx, Terraform, monitoring
-/infra/                 @pelino250
+# DevOps: Docker and Compose files, CI workflows
 /docker-compose*.yml    @pelino250
 **/Dockerfile           @pelino250
 /.github/workflows/     @pelino250
 
-# Mobile: Flutter (Sprint 6)
-/mobile_flutter/        @pelino250
-
-# SPA: React / Angular (Sprint 7)
-/frontend_spa/          @pelino250
-
-# Design & architecture docs
+# Design, architecture docs and ADRs
+/design_docs/           @pelino250
 /docs/                  @pelino250
+/GLOSSARY.md            @pelino250
