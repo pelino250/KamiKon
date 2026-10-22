@@ -1,22 +1,30 @@
-# name: CI
+name: CI
 
-# on:
-#   pull_request:
-#     branches: [main]
-#   push:
-#     branches: [main]
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
 
-# jobs:
-#   linting-and-testing:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v7
-#       - name: Setup Python
-#         uses: actions/setup-python@v7.0.0
-#         with:
-#           python-version: 3.12
-#       - name: Install dependencies
-#         run: pip install -r requirements.txt
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-#       - run: echo "Hello World"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked
+
+      - name: Lint with ruff
+        run: uv run ruff check .
+
+      - name: Run tests
+        run: uv run pytest -v
