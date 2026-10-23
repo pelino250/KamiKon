@@ -14,88 +14,38 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    name: lint
+  # Lint, format, file hygiene and secret scanning, all defined in
+  # .pre-commit-config.yaml. Contributors run the same hooks on commit.
+  pre-commit:
+    name: pre-commit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: true
-      - run: uv run --locked python scripts/ci.py lint
+      - run: uv run --locked pre-commit run --all-files --show-diff-on-failure
 
-  format:
-    name: format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-      - run: uv run --locked python scripts/ci.py format
-
-  hygiene:
-    name: hygiene
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-      - run: uv run --locked python scripts/ci.py hygiene
-
-  django:
-    name: django
+  checks:
+    name: checks
     runs-on: ubuntu-latest
     env:
       DEBUG: "True"
-      SECRET_KEY: ci-only-secret-key-for-tests-0123456789-abcdefghijklmnopqrstuvwxyz
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: true
-      - run: uv run --locked python scripts/ci.py django
-
-  lockfile:
-    name: lockfile
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-      - run: uv run --locked python scripts/ci.py lockfile
-
-  security:
-    name: security
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-      - run: uv run --locked python scripts/ci.py security
-
-  audit:
-    name: audit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-      - run: uv run --locked python scripts/ci.py audit
-
-  secrets:
-    name: secrets
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: true
-      - run: uv run --locked python scripts/ci.py secrets
+      - name: Lockfile matches pyproject.toml
+        run: uv lock --check
+      - name: Django system checks
+        run: uv run --locked python manage.py check
+      - name: No missing migrations
+        run: uv run --locked python manage.py makemigrations --check --dry-run
+      - name: Bandit
+        run: uv run --locked bandit -c pyproject.toml -r apps kamikon manage.py
+      - name: Dependency audit
+        run: uv run --locked pip-audit
 
   test:
     name: test
@@ -129,7 +79,7 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: true
-      - run: uv run --locked python scripts/ci.py test
+      - run: uv run --locked pytest --cov --cov-report=term-missing
 
   workflow-lint:
     name: workflow-lint

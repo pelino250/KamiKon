@@ -4,7 +4,7 @@ Thank you for helping. This guide applies to everyone. Students in a course coho
 
 ## 1. Before you start
 
-- Read `docs/00_DECISIONS_AND_AUDIT.md`, then the document for the area you will touch. Use the terms in `GLOSSARY.md`.
+- Read `docs/01_PRD.md`, then the document for the area you will touch. Use the terms in `GLOSSARY.md`.
 - For anything larger than a small fix, comment on an existing issue or open one first, so the approach can be agreed before you write code.
 - Look for issues labelled `good first issue`.
 - If your change contradicts an ADR in `docs/adr/`, say so in the PR and propose a new ADR. Do not silently override one.
@@ -15,8 +15,9 @@ Follow the quick start in `README.md`. Then:
 
 ```bash
 uv run pre-commit install
-uv run python scripts/ci.py --list
 ```
+
+The hook then runs Ruff, file hygiene checks and secret scanning on every commit.
 
 ## 3. Branches and commits
 
@@ -44,14 +45,14 @@ git commit -s -m "feat(events): add seat pool constraints"
 
 ## 4. Checks
 
-Run every CI check locally before pushing:
+Before pushing, run the same checks CI runs:
 
 ```bash
-uv run --locked python scripts/ci.py            # all stages
-uv run --locked python scripts/ci.py test       # one stage
+uv run pre-commit run --all-files   # lint, format, hygiene, secrets
+uv run pytest --cov                 # tests and the coverage threshold
 ```
 
-GitHub Actions runs the same script, one stage per job. Until Docker Compose lands (roadmap M0-2), the `test` stage reproduces CI only when run with `DEBUG=False` against PostgreSQL, using the environment variables in `.github/workflows/ci.yml`. With the SQLite quick start, run `uv run pytest` instead.
+The other CI steps (Django checks, Bandit, pip-audit, lockfile) are listed in `.github/workflows/ci.yml`; copy any failing step and run it as written. Until Docker Compose lands (roadmap M0-2), tests reproduce CI only with `DEBUG=False` against PostgreSQL, using the environment variables of the `test` job. With the SQLite quick start, the coverage threshold can fail locally while CI passes.
 
 ## 5. Pull requests
 

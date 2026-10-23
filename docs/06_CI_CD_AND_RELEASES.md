@@ -4,35 +4,34 @@ Status: the "Present" rows describe `.github/workflows/` as of 2026-10-23; every
 
 ## 1. Principle
 
-`scripts/ci.py` is the single definition of every check. GitHub Actions runs one stage per job, and contributors run the same command locally. A check that is not in `scripts/ci.py` does not exist.
+Every check is a plain command in `.github/workflows/ci.yml` or a hook in `.pre-commit-config.yaml`, so a contributor can copy any failing step from the workflow and run it locally. Lint, format and secret scanning live in pre-commit, so they run on every local commit as well as in CI.
 
 ## 2. Checks
 
-| Stage | Tool | Gate | Status |
-| :--- | :--- | :--- | :--- |
-| `lint` | Ruff | Required | Present |
-| `format` | Ruff formatter | Required | Present |
-| `hygiene` | pre-commit hooks (YAML, end of file, whitespace, detect-secrets) | Required | Present |
-| `django` | `manage.py check`, `makemigrations --check` | Required | Present |
-| `lockfile` | `uv lock --check` | Required | Present |
-| `test` | pytest, pytest-django, coverage | Required | Present; runs on PostgreSQL 17 |
-| `security` | Bandit | Required | Present |
-| `audit` | pip-audit | Required | Present |
-| `secrets` | detect-secrets against `.secrets.baseline` | Required | Present |
-| `workflow-lint` | actionlint | Required | Present (workflow only, not in `ci.py`) |
-| `pr-title` | Conventional Commit PR titles | Required | Present (workflow only) |
-| `deploy-check` | `manage.py check --deploy` with production settings | Required | M0 |
-| `imports` | import-linter contracts for module boundaries (`02_ARCHITECTURE.md` §3) | Required | M1 |
-| `licenses` | Licence allow-list over the locked dependency set (§6) | Required | M1 |
-| `codeql` | GitHub CodeQL for Python and JavaScript | Required | M1; availability on public repositories to be confirmed in repository settings |
-| `container` | Build image, Trivy scan for HIGH and CRITICAL, SBOM | Required on `main` and releases | M2 |
-| `e2e` | Playwright smoke tests of registration, pass and scanner | Required | M3 |
-| `a11y` | axe-core run in the Playwright suite | Required | M3 |
-| `scorecard` | OpenSSF Scorecard, weekly | Informational | M1 |
+| Check | Tool | CI job | Gate | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| Lint and format | Ruff (`ruff check`, `ruff format`) | `pre-commit` | Required | Present |
+| File hygiene | pre-commit hooks (YAML, end of file, whitespace) | `pre-commit` | Required | Present |
+| Secrets | detect-secrets against `.secrets.baseline` | `pre-commit` | Required | Present |
+| Lockfile | `uv lock --check` | `checks` | Required | Present |
+| Django | `manage.py check`, `makemigrations --check` | `checks` | Required | Present |
+| Security | Bandit | `checks` | Required | Present |
+| Dependency audit | pip-audit | `checks` | Required | Present |
+| Tests | pytest, pytest-django, coverage | `test` | Required | Present; runs on PostgreSQL 17 |
+| Workflow lint | actionlint | `workflow-lint` | Required | Present |
+| PR title | Conventional Commit PR titles | `pr-title` (own workflow) | Required | Present |
+| Deploy check | `manage.py check --deploy` with production settings | `checks` | Required | M0 |
+| Import contracts | import-linter contracts for module boundaries (`02_ARCHITECTURE.md` §3) | `checks` | Required | M1 |
+| Licences | Licence allow-list over the locked dependency set (§6) | `checks` | Required | M1 |
+| CodeQL | GitHub CodeQL for Python and JavaScript | own workflow | Required | M1; availability on public repositories to be confirmed in repository settings |
+| Container | Build image, Trivy scan for HIGH and CRITICAL, SBOM | `container` | Required on `main` and releases | M2 |
+| End-to-end | Playwright smoke tests of registration, pass and scanner | `e2e` | Required | M3 |
+| Accessibility | axe-core run in the Playwright suite | `e2e` | Required | M3 |
+| Scorecard | OpenSSF Scorecard, weekly | own workflow | Informational | M1 |
 
 ### 2.1 Test rules
 - Tests run against PostgreSQL locally (Docker Compose) and in CI (ADR-0006).
-- The coverage threshold is set once, in `[tool.coverage.report] fail_under` in `pyproject.toml`, measured on `apps/` only, at 80 percent. It applies from the first PR that adds a domain model (D-14). Until then the existing value stays, and the `test` stage is run locally with `DEBUG=False` and PostgreSQL to match CI.
+- The coverage threshold is set once, in `[tool.coverage.report] fail_under` in `pyproject.toml`, measured on `apps/` only, at 80 percent. It applies from the first PR that adds a domain model (review D-14). Until then the existing value stays, and local test runs match CI only with `DEBUG=False` and PostgreSQL.
 - Concurrency tests for seat allocation use real parallel database connections (`TransactionTestCase`), not mocks.
 - Tests use the synthetic factories and `seed_demo`; no fixture contains real names or real email addresses. Fictional email addresses use `example.org` or `example.com`.
 
@@ -79,5 +78,5 @@ Workflow permissions are least-privilege per job: `contents: read` by default, a
 ## 7. Environments and deployment
 
 - Development: Docker Compose (`web`, `worker`, `db`, `mailpit`), M0.
-- Staging: optional, for maintainers and course cohorts. It must use synthetic data only unless it meets `05_DATA_PROTECTION.md` §4 (C-15).
+- Staging: optional, for maintainers and course cohorts. It must use synthetic data only unless it meets `05_DATA_PROTECTION.md` §4 (review C-15).
 - Production: the project does not run one. Deployers follow the deployment guide added in M5, which covers the Compose production example, reverse proxy and TLS, backups and restore, upgrades (`migrate` before switching traffic), and key management.

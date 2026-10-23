@@ -21,7 +21,8 @@ Closes #<!-- issue number -->
 ## How Has This Been Tested?
 <!-- Commands you ran, test cases added, manual steps. -->
 ```bash
-uv run --locked python scripts/ci.py
+uv run pre-commit run --all-files
+uv run pytest
 ```
 
 ## Screenshots / Evidence
