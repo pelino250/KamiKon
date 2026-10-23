@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / ".env")
 
 
 def env_bool(name, default=False):
@@ -27,79 +27,82 @@ def env_bool(name, default=False):
         return default
 
     normalized = value.strip().lower()
-    if normalized in {'1', 'true', 'yes', 'on'}:
+    if normalized in {"1", "true", "yes", "on"}:
         return True
-    if normalized in {'0', 'false', 'no', 'off'}:
+    if normalized in {"0", "false", "no", "off"}:
         return False
-    raise ImproperlyConfigured(f'{name} must be a boolean value.')
+    raise ImproperlyConfigured(f"{name} must be a boolean value.")
 
 
 def env_list(name, default=()):
     value = os.environ.get(name)
     if value is None:
         return list(default)
-    return [item.strip() for item in value.split(',') if item.strip()]
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
-DEBUG = env_bool('DEBUG')
-SECRET_KEY = os.environ.get('SECRET_KEY', '')
-if len(SECRET_KEY) < 50 or SECRET_KEY.startswith('django-insecure-'):
-    raise ImproperlyConfigured('Set SECRET_KEY to a strong, unique secret.')
+DEBUG = env_bool("DEBUG")
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
+if DEBUG:
+    SECRET_KEY = SECRET_KEY or "django-insecure-development-key-for-local-only-use"
+else:
+    if len(SECRET_KEY) < 50 or SECRET_KEY.startswith("django-insecure-"):
+        raise ImproperlyConfigured("Set SECRET_KEY to a strong, unique secret.")
 
 ALLOWED_HOSTS = env_list(
-    'ALLOWED_HOSTS',
-    default=('localhost', '127.0.0.1') if DEBUG else (),
+    "ALLOWED_HOSTS",
+    default=("localhost", "127.0.0.1") if DEBUG else (),
 )
 if not DEBUG and not ALLOWED_HOSTS:
-    raise ImproperlyConfigured('Set ALLOWED_HOSTS when DEBUG is False.')
-CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
+    raise ImproperlyConfigured("Set ALLOWED_HOSTS when DEBUG is False.")
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'apps.accounts',
-    'apps.discovery',
-    'apps.events',
-    'apps.notifications',
-    'apps.tickets',
-    'apps.community',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "apps.accounts",
+    "apps.discovery",
+    "apps.events",
+    "apps.notifications",
+    "apps.tickets",
+    "apps.community",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'kamikon.urls'
+ROOT_URLCONF = "kamikon.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'kamikon.wsgi.application'
+WSGI_APPLICATION = "kamikon.wsgi.application"
 
 
 # Database
@@ -107,31 +110,31 @@ WSGI_APPLICATION = 'kamikon.wsgi.application'
 
 if DEBUG:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 else:
-    required_database_settings = ('DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST')
+    required_database_settings = ("DB_NAME", "DB_USER", "DB_PASSWORD", "DB_HOST")
     missing_database_settings = [
         name for name in required_database_settings if not os.environ.get(name)
     ]
     if missing_database_settings:
-        missing = ', '.join(missing_database_settings)
-        raise ImproperlyConfigured(f'Set the production database variables: {missing}.')
+        missing = ", ".join(missing_database_settings)
+        raise ImproperlyConfigured(f"Set the production database variables: {missing}.")
 
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ['DB_NAME'],
-            'USER': os.environ['DB_USER'],
-            'PASSWORD': os.environ['DB_PASSWORD'],
-            'HOST': os.environ['DB_HOST'],
-            'PORT': os.environ.get('DB_PORT', '5432'),
-            'CONN_MAX_AGE': 60,
-            'CONN_HEALTH_CHECKS': True,
-            'OPTIONS': {'sslmode': 'require'},
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DB_NAME"],
+            "USER": os.environ["DB_USER"],
+            "PASSWORD": os.environ["DB_PASSWORD"],
+            "HOST": os.environ["DB_HOST"],
+            "PORT": os.environ.get("DB_PORT", "5432"),
+            "CONN_MAX_AGE": 60,
+            "CONN_HEALTH_CHECKS": True,
+            "OPTIONS": {"sslmode": "require"},
         }
     }
 
@@ -139,11 +142,11 @@ SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 0 if DEBUG else 31_536_000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS')
-SECURE_HSTS_PRELOAD = env_bool('SECURE_HSTS_PRELOAD')
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS")
+SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD")
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
-X_FRAME_OPTIONS = 'DENY'
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+X_FRAME_OPTIONS = "DENY"
 
 
 # Password validation
@@ -151,16 +154,16 @@ X_FRAME_OPTIONS = 'DENY'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -168,9 +171,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Africa/Kigali"
 
 USE_I18N = True
 
@@ -180,35 +183,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 if DEBUG:
-    MAILERS = {
-        'default': {
-            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-        },
-    }
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    smtp_host = os.environ.get('SMTP_HOST', '')
+    smtp_host = os.environ.get("SMTP_HOST", "")
     if not smtp_host:
-        raise ImproperlyConfigured('Set SMTP_HOST when DEBUG is False.')
+        raise ImproperlyConfigured("Set SMTP_HOST when DEBUG is False.")
 
-    MAILERS = {
-        'default': {
-            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-            'OPTIONS': {
-                'host': smtp_host,
-                'port': int(os.environ.get('SMTP_PORT', '587')),
-                'username': os.environ.get('SMTP_USERNAME', ''),
-                'password': os.environ.get('SMTP_PASSWORD', ''),
-                'use_tls': True,
-            },
-        },
-    }
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = smtp_host
+    EMAIL_PORT = int(os.environ.get("SMTP_PORT", "587"))
+    EMAIL_HOST_USER = os.environ.get("SMTP_USERNAME", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+    EMAIL_USE_TLS = True
 
 
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = "accounts.User"
