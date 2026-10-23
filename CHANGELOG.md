@@ -7,6 +7,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 ## [Unreleased]
 
 ### Added
+- `AGENTS.md` with commands and project rules for coding agents; `CLAUDE.md` imports it.
 - CI workflow with four jobs: `pre-commit` (Ruff, file hygiene, secrets), `checks` (lockfile, Django checks, Bandit, pip-audit), `test` (pytest on PostgreSQL 17) and `workflow-lint` (actionlint).
 - Apache License 2.0 (`LICENSE`, `NOTICE`).
 - Specifications for v1.0 in `docs/`: decisions and audit, product requirements, architecture and data model, interface specification, threat model, data protection guide for deployers, CI/CD and release process, roadmap.

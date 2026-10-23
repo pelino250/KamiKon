@@ -50,7 +50,7 @@ DEFAULT_DATA = Path(__file__).with_name("sprint_backlog.json")
 
 # GitHub's default labels, removed only when --prune-default-labels is passed.
 # "good first issue" and "wontfix" are kept: GitHub surfaces the first to new
-# contributors, and docs/agents/triage-labels.md uses the second.
+# contributors, and CONTRIBUTING.md lists the second as a triage label.
 GITHUB_DEFAULT_LABELS = (
     "bug",
     "documentation",
