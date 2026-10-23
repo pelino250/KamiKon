@@ -257,7 +257,7 @@ These need answers from the maintainer or from partners. Nothing in the specific
 | Q-01 | The project brief's one-line description was left unfilled. Confirm the README one-liner, which is taken from the existing README. | README |
 | Q-02 | Which institution and which Hub will pilot, and what success metrics and targets will they accept (time to find an event, registration completion, share of passes scanned successfully at the gate)? | M3, PRD success metrics |
 | Q-03 | Who is the second maintainer or organisation owner? | v1.0 (R-03) |
-| Q-04 | Resolved 2026-10-23: `design_docs/` stays private; see C-21. | — |
+| Q-04 | Resolved 2026-10-23: `design_docs/` stays private; see C-21. | Nothing |
 | Q-05 | Which email domains are confirmed by which institutions? None may be seeded until confirmed. | M1 seed data |
 | Q-06 | Who reviews the Kinyarwanda strings? | v1.0 Kinyarwanda |
 | Q-07 | Will the project run a public demo? If yes, who hosts it and under whose name (it must stay synthetic-only, ADR-0010)? | Demo |
