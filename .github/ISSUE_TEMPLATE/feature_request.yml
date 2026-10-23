@@ -1,0 +1,49 @@
+name: "Feature Request"
+description: Propose a change in behaviour that is not yet planned in docs/07_ROADMAP.md.
+title: "[FEAT] <short summary>"
+labels: ["type:feature", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check docs/01_PRD.md (goals and non-goals) and docs/07_ROADMAP.md first. Items listed as post-v1 are planned but not scheduled.
+        Do not include real personal data in this form.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can a user not do today, and who is that user (use GLOSSARY.md terms)?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: What should happen instead? Include the data the feature would need.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: dropdown
+    id: data
+    attributes:
+      label: Does this collect or expose new personal data?
+      options:
+        - "No"
+        - "Yes (describe it in Proposed behaviour; see docs/05_DATA_PROTECTION.md)"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: adr
+    attributes:
+      label: Architecture
+      options:
+        - label: This conflicts with an ADR in docs/adr/ (name it in Proposed behaviour)

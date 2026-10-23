@@ -1,5 +1,5 @@
 ## Summary
-<!-- What does this PR change, and why? Keep the PR title in Conventional Commit form, e.g. "feat(events): add access-scope validation". -->
+<!-- What does this PR change, and why? Keep the PR title in Conventional Commit form, e.g. "feat(events): add access-policy validation". -->
 
 Closes #<!-- issue number -->
 
@@ -21,7 +21,7 @@ Closes #<!-- issue number -->
 ## How Has This Been Tested?
 <!-- Commands you ran, test cases added, manual steps. -->
 ```bash
-docker compose run --rm web pytest --cov=apps
+uv run --locked python scripts/ci.py
 ```
 
 ## Screenshots / Evidence
@@ -29,12 +29,13 @@ docker compose run --rm web pytest --cov=apps
 
 ## DevOps & Quality Definition of Done
 - [ ] Branch follows `<track>/<issue-number>-<short-description>`
-- [ ] Commits follow Conventional Commits (`feat:`, `fix:`, `ci:`, `docs:`, `refactor:`, `test:`)
-- [ ] Tests added/updated; coverage on new code >= 80%
+- [ ] Commits follow Conventional Commits and are signed off (`git commit -s`)
+- [ ] Tests added/updated; the coverage threshold in `pyproject.toml` passes
 - [ ] `ruff check` / `ruff format --check` pass locally
 - [ ] No secrets, credentials or personal data committed
 - [ ] New environment variables added to `.env.example`
-- [ ] OpenAPI schema updated (if API changed)
+- [ ] OpenAPI schema and docs updated (if the API, data model or configuration changed)
+- [ ] `CHANGELOG.md` updated under Unreleased (if user-visible)
 - [ ] CI is green on this PR
 - [ ] At least **1 peer review** requested
 

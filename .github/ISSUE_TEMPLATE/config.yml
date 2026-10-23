@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 📋 KamiKon Delivery Board
+  - name: Report a security vulnerability
+    url: https://github.com/pelino250/KamiKon/security/advisories/new
+    about: Do not open a public issue for vulnerabilities. See SECURITY.md.
+  - name: KamiKon Delivery Board
     url: https://github.com/pelino250?tab=projects
-    about: See the current sprint, priorities and who's working on what before opening an issue.
+    about: See the current milestone, priorities and who is working on what before opening an issue.

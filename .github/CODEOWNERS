@@ -23,6 +23,5 @@
 /.github/workflows/     @pelino250
 
 # Design, architecture docs and ADRs
-/design_docs/           @pelino250
 /docs/                  @pelino250
 /GLOSSARY.md            @pelino250

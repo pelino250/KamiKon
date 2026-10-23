@@ -1,89 +1,87 @@
 # Contributing to KamiKon
 
-KamiKon runs as **Agile Scrum** with 2-week sprints (3-week sprints for the Flutter and SPA expansions). Work is tracked on the **KamiKon Delivery Board** (GitHub Projects), in **GitHub Issues**, and under **Milestones** (one per sprint).
+Thank you for helping. This guide applies to everyone. Students in a course cohort additionally follow `docs/teaching/SPRINT_PLAYBOOK.md`.
 
-> **Core principle:** a feature is not *Done* when it works on `localhost:8000`. It is *Done* when it passes linting, tests and security checks, builds into a container image in GitHub Actions, and deploys cleanly to Staging.
+## 1. Before you start
 
-## 1. Workflow at a Glance
+- Read `docs/00_DECISIONS_AND_AUDIT.md`, then the document for the area you will touch. Use the terms in `GLOSSARY.md`.
+- For anything larger than a small fix, comment on an existing issue or open one first, so the approach can be agreed before you write code.
+- Look for issues labelled `good first issue`.
+- If your change contradicts an ADR in `docs/adr/`, say so in the PR and propose a new ADR. Do not silently override one.
 
-```text
-Backlog → Ready for Sprint → In Progress → In Review (PR Open) → QA / Staging Verified → Done
+## 2. Set up
+
+Follow the quick start in `README.md`. Then:
+
+```bash
+uv run pre-commit install
+uv run python scripts/ci.py --list
 ```
 
-1. **Pick an issue** in *Ready for Sprint* for the current Sprint, assign yourself, and move it to *In Progress*.
-2. **Create a branch** from `main` (see naming below).
-3. **Commit** using Conventional Commits.
-4. **Open a PR** using the template, link the issue (`Closes #123`), and move the card to *In Review*.
-5. Get at least **one peer review**, make sure CI is green, then merge.
-6. Verify the change on Staging, then move the card to *QA / Staging Verified* and then *Done*.
+## 3. Branches and commits
 
-## 2. Branch Naming
+Branch from `main`:
 
 ```text
-<track>/<issue-number>-<short-description>
+<type>/<issue-number>-<short-description>
 ```
 
-| Prefix | Use for | Example |
-| :--- | :--- | :--- |
-| `feat/` | User stories / features | `feat/14-campus-directory-models` |
-| `fix/` | Bug fixes | `fix/52-rsvp-quota-race` |
-| `devops/` | CI/CD, Docker, infra, observability | `devops/5-github-actions-pytest` |
-| `docs/` | Documentation | `docs/31-api-auth-guide` |
+Examples: `feat/14-campus-directory-models`, `fix/52-registration-race`, `devops/5-compose-postgres`, `docs/31-api-errors`.
 
-Keep branches short-lived (ideally under 3 days). Rebase on or merge `main` often.
-
-## 3. Conventional Commits
+Commit messages and PR titles follow Conventional Commits:
 
 ```text
 <type>(<optional scope>): <imperative summary>
 ```
 
-| Type | Meaning |
-| :--- | :--- |
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `ci` | CI/CD workflow change |
-| `build` | Docker, dependencies, build tooling |
-| `docs` | Documentation |
-| `refactor` | Code change without behaviour change |
-| `test` | Adding or fixing tests |
-| `chore` | Maintenance |
+Types: `feat`, `fix`, `ci`, `build`, `docs`, `refactor`, `test`, `chore`. The `pr-title` check enforces this on PR titles.
 
-Examples: `feat(events): enforce OPEN_ALL_UNIVERSITIES access scope`, `ci: add pytest job with postgres service`.
+Sign off every commit to certify the Developer Certificate of Origin (https://developercertificate.org/), which states that you have the right to submit the work under the project licence:
 
-## 4. Pull Request Rules (Team Agreement)
+```bash
+git commit -s -m "feat(events): add seat pool constraints"
+```
 
-- No direct pushes to `main`. All changes go through a PR.
-- At least **one peer review** (and/or instructor approval) before merging.
-- Status checks must pass before merging (`ruff`, `pytest`, `bandit`, `docker build`) once the CI workflows land in Sprint 0 and Sprint 1.
-- Prefer **squash merge** so `main` history reads as one Conventional Commit per PR.
+## 4. Checks
 
-## 5. Issues & Labels
+Run every CI check locally before pushing:
 
-Always open issues through a template: **User Story**, **DevOps Task**, or **Bug Report**.
+```bash
+uv run --locked python scripts/ci.py            # all stages
+uv run --locked python scripts/ci.py test       # one stage
+```
+
+GitHub Actions runs the same script, one stage per job. Until Docker Compose lands (roadmap M0-2), the `test` stage reproduces CI only when run with `DEBUG=False` against PostgreSQL, using the environment variables in `.github/workflows/ci.yml`. With the SQLite quick start, run `uv run pytest` instead.
+
+## 5. Pull requests
+
+- Use the PR template and link the issue (`Closes #123`).
+- Keep PRs small and focused; one concern per PR.
+- Add or update tests. Coverage is enforced by the threshold in `pyproject.toml`.
+- Update documentation in the same PR when behaviour, configuration, the API or the data model changes.
+- Add an entry under "Unreleased" in `CHANGELOG.md` for user-visible changes.
+- New runtime dependencies need the justification described in `docs/06_CI_CD_AND_RELEASES.md` §6.
+- Never commit secrets, real personal data, or screenshots that show real people's data. Use the synthetic seed data.
+- A maintainer or CODEOWNER review is required. PRs are squash-merged.
+
+## 6. Issues and labels
+
+Open issues through a template: user story, feature request, DevOps task or bug report.
 
 | Group | Labels |
 | :--- | :--- |
 | Type | `type:feature`, `type:devops`, `type:bug`, `type:docs`, `type:security` |
 | Component | `comp:auth`, `comp:institutions`, `comp:events`, `comp:discovery`, `comp:tickets-qr`, `comp:notifications`, `comp:design`, `comp:ci-cd`, `comp:docker`, `comp:infra`, `comp:observability`, `comp:mobile`, `comp:spa` |
-| Learning | `good-first-issue`, `pair-programming-recommended` |
+| Triage | `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix` |
+| Scope | `post-v1` |
+| Learning | `good first issue`, `pair-programming-recommended` |
 
-Issue titles keep an ID prefix: `[US-<sprint>.<n>]` for user stories, `[DO-<sprint>.<n>]` for DevOps tasks, and `[BUG]` for bugs.
+Security problems are never reported as issues. See `SECURITY.md`.
 
-## 6. Board Fields
+## 7. Conduct
 
-| Field | Values |
-| :--- | :--- |
-| **Status** | Backlog · Ready for Sprint · In Progress · In Review (PR Open) · QA / Staging Verified · Done |
-| **Track** | Backend (Django/API) · Frontend (UI/UX) · DevOps & Infra · Mobile (Flutter) · SPA (React/Angular) |
-| **Priority** | P0 - Critical · P1 - High · P2 - Medium · P3 - Nice to Have |
-| **Story Points** | Fibonacci: 1, 2, 3, 5, 8 (split anything bigger than 8) |
-| **Sprint** | Sprint 0 … Sprint 7 (iteration) |
+Participation is governed by `CODE_OF_CONDUCT.md`.
 
-## 7. DevOps Champion Rotation
+## 8. Licence
 
-Each sprint, one team member is the **DevOps Champion**. They own the pipeline health for that sprint, review every `type:devops` PR, and demo the sprint's DevOps deliverable at the review. Rotate the role so every student practises both Web Development and DevOps.
-
-## 8. Maintaining the Backlog
-
-The initial backlog is generated from [`scripts/sprint_backlog.json`](scripts/sprint_backlog.json) by [`scripts/setup_github_project.py`](scripts/setup_github_project.py). To add planned work in bulk, edit the JSON and re-run the script. It is idempotent and only creates what is missing.
+By contributing, you agree that your contribution is licensed under the Apache License 2.0, as stated in section 5 of the licence.

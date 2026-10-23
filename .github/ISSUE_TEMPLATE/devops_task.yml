@@ -1,4 +1,4 @@
-name: "⚙️ DevOps Task"
+name: "DevOps Task"
 description: CI/CD, containers, infrastructure, security scanning or observability work.
 title: "[DO-X.X] <short task description>"
 labels: ["type:devops"]

@@ -1,4 +1,4 @@
-name: "📘 Agile User Story"
+name: "Agile User Story"
 description: A user-centric feature linked to Web / Mobile / API work and a DevOps Definition of Done.
 title: "[US-X.X] As a <role>, I want <goal> so that <benefit>"
 labels: ["type:feature"]
@@ -15,7 +15,7 @@ body:
       label: User Story
       description: Who wants what, and why?
       value: |
-        **As a** [Student / Faculty / Public Community Guest / Event Organizer / Campus Moderator],
+        **As a** [Student / Faculty / Public Community Guest / Organizer / Approver / Gate Staff],
         **I want to** [perform specific action],
         **So that** [academic value / cross-campus benefit].
     validations:
@@ -61,7 +61,7 @@ body:
       description: Screen in `design.md` and the components involved.
       placeholder: |
         - Screen: Screen 1 — Main Event Discovery Hub
-        - Components: <EventCard />, <AccessScopePill />
+        - Components: <EventCard />, <AccessPolicyPill />
 
   - type: textarea
     id: acceptance

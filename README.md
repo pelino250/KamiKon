@@ -1,68 +1,66 @@
 # KamiKon
 
-**KamiKon** (*Kaminuza + Connect*) is an inter-university academic event management, discovery and smart-notification platform for higher-learning institutions and the wider academic and innovation community in Rwanda.
+KamiKon (*Kaminuza* + *Connect*) is an open-source platform on which universities and partner Hubs in Rwanda publish academic Events, decide who may attend, and issue gate passes that campus security can check with or without a network connection.
 
-It is built as an industry-grade capstone in which **Web Development**, **Mobile/SPA Engineering** and **DevOps** are integrated into every sprint.
+**Status: pre-alpha.** The repository contains the project skeleton, CI, and the v1.0 specifications. No user-facing feature is implemented yet. Do not deploy it with real users.
 
-| Phase | Frontend | Backend |
-| :--- | :--- | :--- |
-| 1. Core Web (MVP) | Django Templates + HTMX / Tailwind | Django modular monolith (service layer) |
-| 2. API-First | Swagger / Redoc | Django REST Framework, JWT, `/api/v1/` |
-| 3. Mobile Companion | Flutter | `/api/v1/` + FCM |
-| 4. Modern SPA | React or Angular | `/api/v1/` + CORS |
+## Why
 
-## Project Management
+Academic events at one university are hard to find for students and staff at another, and for alumni and industry. When visitors do come, gates often have no list of who is expected. KamiKon combines three things general event platforms do not: eligibility across institutions (verified university affiliation and four Access Policies), separate seat pools for host members, visiting members and the public, and a signed gate pass that works offline. It is designed to be self-hosted, so an institution can keep personal data in Rwanda.
 
-- **Board:** KamiKon Delivery Board (GitHub Projects): Status, Track, Priority, Story Points and Sprint fields
-- **Milestones:** one per sprint, Sprint 0 → Sprint 7
-- **Issues:** created from the *User Story*, *DevOps Task* and *Bug Report* templates
-- **How to contribute:** see [CONTRIBUTING.md](CONTRIBUTING.md)
+## Quick start (development)
 
-## Re-creating the GitHub Setup
-
-Labels, milestones, the backlog issues and the Project board are generated from [`scripts/sprint_backlog.json`](scripts/sprint_backlog.json):
+Requirements: Git, and [uv](https://docs.astral.sh/uv/), which installs the pinned Python 3.14 for you.
 
 ```bash
-gh auth refresh -h github.com -s project      # one-time: allow Projects (v2) access
-python3 scripts/setup_github_project.py --dry-run
-python3 scripts/setup_github_project.py --start-date 2026-10-19
+git clone https://github.com/pelino250/KamiKon.git
+cd KamiKon
+uv sync --locked
+cp .env.example .env          # DEBUG=True; a development SECRET_KEY is used when blank
+uv run python manage.py migrate
+uv run python manage.py runserver
 ```
 
-The script is idempotent and safe to re-run. Use `--only labels,milestones,issues,project` to run individual phases.
+Open http://127.0.0.1:8000/admin/. To create a login: `uv run python manage.py createsuperuser`.
 
-## Django environment
+Run the tests: `uv run pytest`.
 
-Copy `.env.example` to `.env` for local development and set `SECRET_KEY` to a unique
-secret generated with Django:
+This quick start uses SQLite and exists only until the Docker Compose setup lands (roadmap item M0-2). Seat allocation and search need PostgreSQL, so the full suite and the CI coverage gate require PostgreSQL. See ADR-0006.
 
-```bash
-cp .env.example .env
-uv run python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-```
+## Documentation
 
-`DEBUG=True` uses SQLite and the console email backend for development. Set
-`DEBUG=False` in production to use PostgreSQL, secure cookies, HTTPS redirects, and
-the SMTP email backend. Production must provide `SECRET_KEY`, `ALLOWED_HOSTS`,
-`DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `SMTP_HOST`; add
-`CSRF_TRUSTED_ORIGINS` when cross-origin POST requests are required. Provide secrets
-through the deployment platform rather than committing a `.env` file.
-The deployment check warns about HSTS subdomain inclusion and preload; enable these
-only when all subdomains are HTTPS-only and the domain meets preload requirements.
+| Read this | For |
+| :--- | :--- |
+| [docs/00_DECISIONS_AND_AUDIT.md](docs/00_DECISIONS_AND_AUDIT.md) | Decisions, risks, open questions and sources; start here |
+| [docs/01_PRD.md](docs/01_PRD.md) | What v1.0 does and does not do |
+| [docs/02_ARCHITECTURE.md](docs/02_ARCHITECTURE.md) | Components, data model, eligibility, gate pass format |
+| [docs/03_API_SPEC.md](docs/03_API_SPEC.md) | Web routes and `/api/v1/` |
+| [docs/04_THREAT_MODEL.md](docs/04_THREAT_MODEL.md) | Security model |
+| [docs/05_DATA_PROTECTION.md](docs/05_DATA_PROTECTION.md) | Obligations for deployers (Rwanda Law No. 058/2021) |
+| [docs/06_CI_CD_AND_RELEASES.md](docs/06_CI_CD_AND_RELEASES.md) | Checks, supply chain, versioning |
+| [docs/07_ROADMAP.md](docs/07_ROADMAP.md) | Milestones and definition of done for v1.0 |
+| [docs/adr/](docs/adr/) | Architecture decision records |
+| [GLOSSARY.md](GLOSSARY.md) | Domain vocabulary used everywhere |
 
-## Repository Layout
-
-The layout is flat: the Django project and apps live at the repository root.
+## Repository layout
 
 ```text
-.github/            Issue/PR templates, CODEOWNERS, workflows
-kamikon/            Django project package (settings, URLs, ASGI/WSGI)
-apps/               Django apps (accounts, events, tickets, ...)
-tests/              Test suite
-design_docs/        Design and architecture notes
-docs/               Agent config (docs/agents) and ADRs (docs/adr)
-scripts/            GitHub project automation
-GLOSSARY.md         Domain vocabulary
+.github/     Issue and PR templates, CODEOWNERS, workflows
+kamikon/     Django project package (settings, URLs, ASGI/WSGI)
+apps/        Django apps (accounts, events, tickets, ...)
+tests/       Test suite
+docs/        Specifications, ADRs, teaching playbook
+scripts/     CI entry point and GitHub project automation
 ```
 
-Later phases add `mobile_flutter/` (Flutter app), `frontend_spa/` (React or Angular) and
-deployment files (Dockerfile, Docker Compose) at the root when they are built.
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Students in a course cohort also read [docs/teaching/SPRINT_PLAYBOOK.md](docs/teaching/SPRINT_PLAYBOOK.md). Everyone follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). Do not open public issues for them.
+
+## Licence
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

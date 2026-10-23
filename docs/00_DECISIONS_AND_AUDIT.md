@@ -1,0 +1,319 @@
+# 00 — Decisions and Audit
+
+Status: accepted on 2026-10-23. Owner: Pelin Mutanguha (maintainer).
+
+This document is the entry point for every other file in `docs/`. It records what was wrong in earlier material, what was decided instead, what can still go wrong, and what remains open. When another document disagrees with this one, this one wins until it is amended by a pull request.
+
+Documents governed by this audit:
+
+| File | Purpose |
+| :--- | :--- |
+| `docs/01_PRD.md` | Product requirements for v1.0 |
+| `docs/02_ARCHITECTURE.md` | Components, data model, eligibility and pass design |
+| `docs/03_API_SPEC.md` | Web routes and the `/api/v1/` contract |
+| `docs/04_THREAT_MODEL.md` | STRIDE threat model and security controls |
+| `docs/05_DATA_PROTECTION.md` | Obligations for anyone who deploys KamiKon (Rwanda Law No. 058/2021) |
+| `docs/06_CI_CD_AND_RELEASES.md` | Pipeline, supply-chain controls, versioning and release process |
+| `docs/07_ROADMAP.md` | Milestones to v1.0, definition of done, backlog changes |
+| `docs/adr/` | Architecture decision records 0001 to 0011 |
+| `docs/teaching/SPRINT_PLAYBOOK.md` | Course-cohort process (sprints, board, DevOps Champion) |
+
+Superseded for engineering purposes: `design_docs/features_and_architecture.md` and `design_docs/agile_devops_roadmap.md`. `design_docs/` is the maintainer's private design workspace and is not published (Q-04). `design_v3.md` remains the visual design reference, except where section 2 below corrects it; the requirements contributors need from it are in `01_PRD.md` NFR-03.
+
+---
+
+## 1. What was reviewed
+
+- Local repository at `Kami/` (branch `main`, 14 commits, with uncommitted changes to 43 files) and the public repository `github.com/pelino250/KamiKon` (public, no licence file, 29 open issues at review time).
+- `README.md`, `CONTRIBUTING.md`, `GLOSSARY.md`, `AGENTS.md`, `docs/adr/0001`, `docs/agents/*`, `.github/*`, `scripts/*`, `tests/*`, `kamikon/settings.py`, every `apps/*` module, `pyproject.toml`, `uv.lock`, `.pre-commit-config.yaml`, `.secrets.baseline`.
+- All nine files in `design_docs/`: `design.md`, `design_v2.md` and `design_v3.md`; `stitch_prompts.md`, `stitch_prompts_v2.md` and `stitch_prompts_v3.md`; `features_and_architecture.md`; `agile_devops_roadmap.md`; and `PROJECT_README.md`.
+- Executed on 2026-10-23 in a clean environment: `uv sync --locked`, `ruff check`, `ruff format --check`, `manage.py check`, `makemigrations --check`, `uv lock --check`, `bandit`, `pip-audit`, `pytest` with coverage, and the README quick start (`migrate`, `runserver`, HTTP 200 on `/admin/login/`).
+
+Links that could not be opened: none of the attached material contained external links beyond those checked in section 8. Two primary-source attempts were blocked from the shell (the Official Gazette PDF download); the law text was read on RwandaLII instead.
+
+---
+
+## 2. Corrections to prior assumptions
+
+Each entry states the earlier claim, why it is wrong, the evidence, and the replacement decision.
+
+### 2.1 Security and cryptography
+
+**C-01. "QR Gate Passes use HMAC-SHA256 so they cannot be forged" combined with "the scanner works fully offline".**
+HMAC is a symmetric construction: the same key that verifies a tag also creates one (RFC 2104). An offline scanner can only verify an HMAC if the secret key is on the scanning device. Every organizer phone would then hold a key that can mint valid passes for every event, and extracting it from one phone breaks the whole deployment.
+Replacement: passes are signed with Ed25519 (RFC 8032). The private key stays on the server; scanners receive public keys only. pretix uses the same approach for offline check-in ("The secret is then signed with an Ed25519 signature to prevent forging", pretix ticket secrets guide). See ADR-0002.
+
+**C-02. "Scanner works fully offline … conflict note `Used on another device`" (design_v3 §5.5) presented as a real-time guarantee of single entry.**
+Two offline devices cannot know about each other's scans. pretix documents the same limitation for its signature scheme: duplicate detection in offline mode is not possible. A pass can be admitted twice at two gates until the devices sync.
+Replacement: check-in is online-first. An online scan records the check-in on the server atomically and rejects reuse. Offline scans are queued, de-duplicated per device, and reconciled on sync; conflicts are reported to the organizer after the fact. Gates that need strict single entry use one scanning device, or stay online. This trade-off is accepted explicitly in ADR-0002.
+
+**C-03. "A screenshot is useless after the event window."**
+True but beside the point. During the valid window, a screenshot or a forwarded image works exactly like the original. The defence against sharing is single-use check-in (C-02) and the name on the roster matched against a physical ID, not the time limit.
+
+**C-04. "Register with an institutional email and automatically receive a Verified University Badge" (US-1.2, features doc Module 1).**
+A domain match only shows what the user typed. Verification requires proof of mailbox control (a single-use link or code sent to that address). Graduates also commonly keep institutional addresses, so a badge issued once is not evidence of current membership.
+Replacement: an Affiliation becomes VERIFIED only after mailbox proof, and expires 12 months later unless re-verified. See ADR-0003.
+
+**C-05. Domain-to-campus mapping, for example `@andrew.cmu.edu` for CMU-Africa.**
+An email domain identifies at best a University, never a Campus. The `andrew.cmu.edu` domain is, as far as the reviewer knows, issued across Carnegie Mellon globally; this is unverified and must be confirmed with CMU-Africa before that domain is seeded. Multi-campus universities (University of Rwanda) share one domain across campuses.
+Replacement: University comes from the verified domain; Campus is self-declared by the member, can be changed at most once every 90 days, and can be revoked by an Approver of that Campus. `CAMPUS_ONLY` eligibility is therefore weaker than `INSTITUTION_ONLY`, and the UI says so to organizers. See ADR-0004.
+
+**C-06. National ID or passport last 4 digits collected at sign-up (design.md Flow 1, stitch_prompts.md Prompt 2, features doc role 2), later moved to "just in time" (design_v2/v3).**
+The digits are typed by the user and cannot be checked by the platform, so they add no assurance. Any guard who checks them must look at the physical document, which already shows the holder's name. Collecting them still creates personal data that has to be secured, disclosed and deleted.
+Replacement: KamiKon does not collect any government identifier. For events whose host requires an ID check, the gate roster shows the attendee's name as registered; gate staff compare it with the physical document. Attendees are told this before they register. See ADR-0008. The design_v3 "Just-in-time ID" dialog (§7.2), the "Tap to reveal" control (§5.4) and stitch_prompts_v3 Prompts 10 and 23 are withdrawn.
+
+**C-07. Dual-mode authentication with JWT for v1 (features doc Module 2, US-1.3).**
+No v1 client needs bearer tokens: the web app and the PWA scanner are same-origin and can use Django sessions with CSRF protection. JWT adds refresh-token storage, revocation and rotation problems for no v1 benefit. `djangorestframework-simplejwt` 5.5.1 also declares support only up to Django 5.2 in its PyPI classifiers.
+Replacement: session authentication only in v1. Token authentication for native clients is designed when a native client is accepted onto the roadmap. See ADR-0005.
+
+### 2.2 Data model and domain
+
+**C-08. Data model in features doc §4: `Event.host_campus_id` plus `organizer_club_id`, and an `OrganizationClub` entity.**
+This contradicts ADR-0001 and `GLOSSARY.md`: the Host is a Campus or a Hub, and a club is only a label. The model also has no way to express a Hub-hosted Event.
+Replacement: `Event` has `host_campus` and `host_hub`, exactly one non-null (database check constraint), and a free-text `organizer_label`. Followable organizations are out of v1 scope.
+
+**C-09. Hub-hosted events with `INSTITUTION_ONLY` or `CAMPUS_ONLY` access.**
+A Hub has no members in the eligibility sense, so these two policies are meaningless for a Hub host.
+Replacement: Hub-hosted Events may use only `PUBLIC_COMMUNITY` or `OPEN_ALL_UNIVERSITIES`. Enforced by validation in the service layer and by a database constraint.
+
+**C-10. Capacity: `total_capacity`, `univ_visitor_quota`, `public_guest_quota` (model) versus three pools `internal_quota`, `inter_university_quota`, `public_guest_quota` (text).**
+Two quotas in the model and three in the text, plus a total that can disagree with their sum.
+Replacement: three Seat Pools, `HOST_MEMBERS`, `VISITING_MEMBERS` and `COMMUNITY_GUESTS`, each with its own capacity; event capacity is their sum and is not stored separately. Each pool has its own waitlist. See ADR-0004.
+
+**C-11. "Campus Moderator / Dean of Students Office" as a role (features doc role 4).**
+`GLOSSARY.md` names this role Approver and lists "Moderator" as a term to avoid. The features doc also never says who approves Hub-hosted events.
+Replacement: the term is Approver, scoped to one Host (a Campus or a Hub). Events with `PUBLIC_COMMUNITY` or `OPEN_ALL_UNIVERSITIES` access require approval by an Approver of the same Host; the other two policies publish directly. A new role, Gate Staff, may scan passes for a Host's events without being an Organizer.
+
+**C-12. `access_scope` field name and "Access Scope" in backlog items US-2.1 and US-7.2.**
+`GLOSSARY.md` says "Access Policy", avoid "Access Scope". US-2.1 also lists `Hybrid` as an access value, which ADR-0001 explicitly removed.
+Replacement: field `access_policy`, values as in the glossary; `delivery_mode` is separate. The backlog JSON has been corrected for US-2.1 and US-7.2 (section 7 of `docs/07_ROADMAP.md`).
+
+**C-13. Development on SQLite, production on PostgreSQL (`kamikon/settings.py`).**
+The design depends on `select_for_update()` for seat allocation and PostgreSQL full-text search. Django's documentation states that `select_for_update()` on SQLite has no effect, so race-condition tests on SQLite pass while production fails. Search code cannot be tested at all.
+Replacement: PostgreSQL in every environment, provided locally by Docker Compose. The database choice is driven by `DATABASE_URL`, not by `DEBUG`. See ADR-0006. Until Compose lands (roadmap item M0-2), the SQLite quick start stays in the README with a warning.
+
+**C-14. Background work through Celery and Redis, with WebSockets via Django Channels.**
+Not wrong, but it costs a self-hoster two extra services. Redis 7.4 to 7.8 is not under an open-source licence (RSALv2 or SSPLv1); Redis 8 adds AGPLv3 as an option (redis.io licensing page). v1 has only low-volume email work.
+Replacement: application code uses Django's Tasks API (new in Django 6.0). The production backend is `django-tasks-db` with its `db_worker` command, so PostgreSQL is the only stateful service. No WebSockets in v1. See ADR-0007, including the compatibility risk R-07.
+
+### 2.3 Platform, legal and policy
+
+**C-15. Staging and production "on a cloud VM (DigitalOcean/AWS/Render/Railway)" (DO-3.4), with Sentry, FCM and third-party SMTP.**
+Rwanda Law No. 058/2021, Article 50: "The data controller or the data processor stores personal data in Rwanda", and storage outside Rwanda is permitted only with a registration certificate that authorises it. Article 48 sets conditions for sharing or transferring personal data outside Rwanda, including authorisation from the supervisory authority. Sending error reports with user context to Sentry, push tokens to Firebase, or addresses to a foreign email relay is a transfer.
+Replacement: KamiKon is software; whoever deploys it with real users is the data controller and must meet these obligations. The project's own demo runs only on synthetic data with sign-up disabled. All third-party telemetry is off by default. See ADR-0010 and `docs/05_DATA_PROTECTION.md`.
+
+**C-16. "Offline QR ticket caching" plus offline maps through `flutter_map` and Leaflet with OpenStreetMap.**
+The OSM Foundation tile policy says "Offline use is not permitted on `tile.openstreetmap.org`", prohibits pre-fetching, requires a unique User-Agent and visible attribution, and states access can be "blocked without prior notice".
+Replacement: the map view is deferred to v1.1. When built, it is online only, the tile URL is a deployment setting, and the documentation tells deployers to use their own or a commercial tile provider for production traffic.
+
+**C-17. "English and Kinyarwanda at launch, all strings externalised" (design_v3 §8).**
+Django ships no `rw` locale (checked against `django/conf/locale` in Django 6.1.2; Swahili `sw` exists, Kinyarwanda does not). Kinyarwanda at launch means the project must translate Django's own form and validation messages as well as its own strings, and must add `rw` to `LANGUAGES` with its own `LANG_INFO`.
+Replacement: v1.0 ships complete English. Kinyarwanda covers the attendee flows (sign-up, event detail, registration, pass, gate results) and is released only after review by a fluent reviewer, who is not yet named (open question Q-06).
+
+**C-18. "Add to Apple Wallet" and "Add to Google Wallet" on the pass (design_v3 §5.4, stitch_prompts_v3 Prompts 3 and 9).**
+Apple: signing a pass requires a Pass Type ID and a Pass Type ID certificate created in an Apple Developer account (Apple, "Building a Pass"); membership has an annual fee that was not confirmed from Apple's site during this review. Google: a new issuer account starts in demo mode "where you won't have publishing access" until publishing access is granted (Google Wallet issuer onboarding). Each deployer would need its own accounts, because the pass is signed by the issuer.
+Replacement: wallet export is post-v1 and optional per deployment. The v1 pass is a PWA page that works offline.
+
+**C-19. Phone number OTP for Community Guests (features doc Module 2).**
+SMS delivery needs a paid provider account in each deployment; none was specified.
+Replacement: email verification only in v1.
+
+**C-20. Personal data of children.** Not addressed. Article 9 requires the consent of a holder of parental responsibility to process the data of a child under 16. The audience includes "High School Graduates".
+Replacement: sign-up requires the user to confirm they are 16 or older. No date of birth is stored.
+
+### 2.4 Repository and tooling
+
+**C-21. `design_docs/` is listed in README and CODEOWNERS, but `.gitignore` ignores it.**
+The public repository contains none of the design or architecture material, so outside contributors cannot see what they are building.
+Replacement: the specifications that contributors need now live in `docs/` and are tracked. `design_docs/` stays private (Q-04, resolved): it still carries material withdrawn by ADR-0008. The accessibility floor and blocking design checks moved into NFR-03, and CODEOWNERS no longer lists the path.
+
+**C-22. "A green local run predicts a green PR" (CONTRIBUTING §4).**
+Measured on 2026-10-23: `scripts/ci.py test` with `DEBUG=True` (the documented local setup) fails the coverage gate at 73.68 percent against a threshold of 75 percent. CI passes because it runs with `DEBUG=False` and PostgreSQL, which exercises different branches of `settings.py`. The two runs measure different code.
+Replacement: tests run against PostgreSQL in both places (C-13). Coverage is measured on `apps/` only and the threshold is set once, in `pyproject.toml` (decision D-14).
+
+**C-23. Python version.** `pyproject.toml` declared `requires-python = ">=3.14"` with no upper bound and no `.python-version`. On 2026-10-23, `uv sync` selected Python 3.15.0. Django's FAQ lists Python 3.15 support for Django 6.1 as "added in 6.1.3", and the lock pins 6.1.2. The roadmap CI example also uses Python 3.12, and the roadmap claims "Python 3.12" elsewhere.
+Replacement: `.python-version` set to `3.14` and `requires-python = ">=3.14,<3.15"` until the lock moves to Django 6.1.3 or later. Applied in this change; `uv.lock` regenerated.
+
+**C-24. Coverage thresholds disagree:** 75 percent (`pyproject.toml`), 80 percent (PR template, roadmap), 90 percent (US-1.3).
+Replacement: one threshold, 80 percent line coverage of `apps/`, in `pyproject.toml` only, enforced once the first domain model lands. Other documents refer to it without restating the number.
+
+**C-25. Settings layout.** US-0.2 asks for split settings (`base`, `local`, `staging`, `prod`) with `django-environ`; the code has one `settings.py` using `python-dotenv` with tested production guards. Both cannot be done.
+Replacement: keep the single tested settings module. Environments differ by environment variables only (twelve-factor). US-0.2 is closed as superseded.
+
+**C-26. App layout.** The features doc places code under `config/` and lists an `institutions` app; the code uses `kamikon/` and has no `institutions` app but has empty `discovery` and `community` apps.
+Replacement: add `apps/institutions` in milestone M1. Remove the empty `community` app (Q&A, ratings and resource vault are post-v1). Keep `discovery` for search and feed selectors.
+
+**C-27. Label `good-first-issue`.** GitHub's documentation names the label "good first issue" as the one that "can increase the likelihood that your issues are surfaced". The setup script also lists "good first issue" and "wontfix" among the default labels it deletes with `--prune-default-labels`, while `docs/agents/triage-labels.md` depends on `wontfix`.
+Replacement: the backlog uses `good first issue` and the triage labels; the prune list no longer deletes either. Applied in this change.
+
+**C-28. Unpinned or contradictory tool claims in the roadmap.** Black is listed alongside Ruff (Ruff formats; Black was removed in the working tree); `trufflehog`/`gitleaks` are listed while the repository uses `detect-secrets`; sprint counts are "Sprint 0 through Sprint 8" in §2.2 and Sprint 0 to Sprint 7 everywhere else.
+Replacement: tooling is listed once in `docs/06_CI_CD_AND_RELEASES.md`. The sprint plan is replaced by milestones in `docs/07_ROADMAP.md`.
+
+**C-29. Styling and terms in issue templates.** All four files in `.github/ISSUE_TEMPLATE/` used emoji in names, and `user_story.yml` used "Campus Moderator" and `<AccessScopePill />`. Emoji removed, terms aligned with `GLOSSARY.md`, and a security reporting link added to `config.yml`.
+
+---
+
+## 3. Contradictions between requirements and their resolution
+
+| ID | Requirement A | Requirement B | Decision | Trade-off accepted |
+| :--- | :--- | :--- | :--- | :--- |
+| X-01 | Passes cannot be forged | Scanner verifies offline | Ed25519 signatures; public keys on scanners (ADR-0002) | Larger QR payload than an HMAC tag; key rotation must keep old public keys until passes expire |
+| X-02 | Each pass admits once | Scanning works offline on several devices | Online-first, offline queue, post-sync conflict report (ADR-0002) | A pass can be used twice at two offline gates; detected after sync, not prevented |
+| X-03 | Badge proves university membership | Badge from email domain | Mailbox proof plus 12-month expiry (ADR-0003) | Members re-verify yearly; graduates lose member eligibility within a year, not immediately |
+| X-04 | `CAMPUS_ONLY` restricts to home campus | Email identifies university only | Self-declared campus with change limits and Approver revocation (ADR-0004) | `CAMPUS_ONLY` is enforceable only to the extent members are honest; gate staff remain the control |
+| X-05 | Gate security checks ID | Minimise personal data | No government ID stored; roster shows registered name (ADR-0008) | Guards must check name against a physical document; no digits to compare |
+| X-06 | Store data in Rwanda (Art. 50) | Cheap foreign cloud staging, SaaS telemetry | Deployer is controller; telemetry off by default; synthetic-only demo (ADR-0010) | Some deployers must pay more for local hosting or obtain authorisation |
+| X-07 | Offline-first map | OSM tile policy forbids offline use | Map deferred to v1.1, online only | No map at the gate without network |
+| X-08 | Teach four frontends | One maintainer keeps v1 healthy | v1 is server-rendered web plus PWA; Flutter and SPA are post-v1 tracks (ADR-0005) | Students on the mobile and SPA tracks build against a stable API later rather than during v1 |
+| X-09 | p95 under 200 ms for the feed | No reference hardware defined | Target measured on a defined reference deployment (`docs/01_PRD.md` NFR-01) | Numbers are comparable only on that reference |
+| X-10 | Hub may host events | Institution and campus policies need a university | Hub events limited to two policies | None of substance |
+| X-11 | Approver's own events approved immediately (glossary) | Approval is a control | Kept, but every self-approval is written to the audit log and visible to other Approvers of the Host | A single Approver Host has no second pair of eyes |
+
+---
+
+## 4. Decision records
+
+Decisions marked "confirmed" were put to the maintainer on 2026-10-23 because they are expensive to reverse. The rest were made by the reviewer and can be changed by pull request.
+
+| ID | Decision | Status | Reversal cost | Record |
+| :--- | :--- | :--- | :--- | :--- |
+| D-01 | Licence: Apache-2.0 | Confirmed | High once outside contributions exist | ADR-0009 |
+| D-02 | Name stays KamiKon | Confirmed | High after v1.0 announcement | Risk R-10 |
+| D-03 | v1.0 = Django server-rendered web (HTMX) plus installable PWA for passes and scanning | Confirmed | Medium | ADR-0005 |
+| D-04 | Security and conduct reports go to pelmut2000@gmail.com; security reports also through GitHub private vulnerability reporting | Confirmed | Low | `SECURITY.md`, `CODE_OF_CONDUCT.md` |
+| D-05 | Ed25519-signed passes, online-first check-in | Reviewer | Medium after first release (pass format is versioned) | ADR-0002 |
+| D-06 | Verified Member requires mailbox proof, expires after 12 months | Reviewer | Low | ADR-0003 |
+| D-07 | Three Seat Pools; hub policy limits; self-declared campus | Reviewer | Medium after data exists | ADR-0004 |
+| D-08 | PostgreSQL in all environments; `DATABASE_URL` decoupled from `DEBUG` | Reviewer | Low | ADR-0006 |
+| D-09 | Django Tasks API with `django-tasks-db` backend; no Redis in v1 | Reviewer | Low (application code is backend-agnostic) | ADR-0007 |
+| D-10 | No government identifiers collected | Reviewer | Low to add later; high to remove once collected | ADR-0008 |
+| D-11 | Deployer is the data controller; project demo uses synthetic data only | Reviewer | Low | ADR-0010 |
+| D-12 | Integer primary keys internally; UUIDv7 `public_id` in URLs and API | Reviewer | High after first release, low now (only `User` has a migration and no data exists) | ADR-0011 |
+| D-13 | Authentication through `django-allauth` (MIT; declares Django 6.1 support on PyPI) with email as the login identifier; session auth only | Reviewer | Medium | ADR-0005 |
+| D-14 | One coverage threshold, 80 percent of `apps/`, in `pyproject.toml` | Reviewer | Low | `docs/06_CI_CD_AND_RELEASES.md` |
+| D-15 | Python 3.14 pinned via `.python-version`; `requires-python = ">=3.14,<3.15"` | Reviewer, applied | Low | C-23 |
+| D-16 | Semantic Versioning 2.0.0 from v0.1.0; Keep a Changelog 1.1.0 format | Reviewer | Low | `CHANGELOG.md` |
+| D-17 | Governance: maintainer-led (single maintainer) until a second maintainer is appointed; path documented | Reviewer | Low | `GOVERNANCE.md` |
+| D-18 | Open-source contribution process separated from the course-cohort process | Reviewer, applied | Low | `CONTRIBUTING.md`, `docs/teaching/SPRINT_PLAYBOOK.md` |
+| D-19 | Email-only verification in v1 (no SMS) | Reviewer | Low | C-19 |
+| D-20 | Minimum age 16, by self-confirmation | Reviewer | Low | C-20 |
+| D-21 | QR codes rendered server-side as SVG with `segno` (BSD licence, no dependencies) | Reviewer | Low | `docs/02_ARCHITECTURE.md` |
+
+---
+
+## 5. Risk register
+
+Likelihood and impact are rated Low, Medium or High. A gate is the point in the roadmap where the mitigation must be in place before work continues.
+
+| ID | Risk | Likelihood | Impact | Mitigation | Gate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| R-01 | No institution adopts it; the platform has no events and no users | High | High | Recruit one university office and one Hub as pilot partners before building registration; define success metrics with them (Q-02) | Before M3 starts |
+| R-02 | Campus security does not accept KamiKon passes, so the gate pass has no value | Medium | High | Pilot with a named security office; the roster export works even without scanning | Before M3 ends |
+| R-03 | Bus factor of one: the maintainer becomes unavailable | High | High | Move the repository to a GitHub organisation with a second owner; document release and key procedures; appoint a second maintainer before v1.0 | Before v1.0 |
+| R-04 | Signing key leaked or lost | Low | High | Key only on the server, loaded from a secret file; key ID in every pass; rotation and revocation runbook; tests that scanners reject unknown key IDs | Before M3 ends |
+| R-05 | Duplicate entry through offline scanning | Medium | Medium | Online-first scanning; post-sync conflict report; single-device mode documented for strict gates | Before M3 ends |
+| R-06 | Deployer stores data abroad or sends it to foreign SaaS without authorisation (Art. 48, 50) | High | High (for the deployer) | Telemetry off by default; `docs/05_DATA_PROTECTION.md` checklist; deployment guide states the obligation in the first section | Before v1.0 |
+| R-07 | `django-tasks-db` (beta, PyPI classifiers list Django 5.2 and 6.0 only) breaks on Django 6.1 or 6.2 | Medium | Medium | Integration test of enqueue plus worker in CI; application code only uses `django.tasks`; fallback backend is Celery with Valkey | M1 (first task) and every Django minor upgrade |
+| R-08 | Other dependencies lag Django releases (`drf-spectacular`, `whitenoise`, `django-cors-headers`, `django-prometheus` classifiers stop at 6.0) | Medium | Low | Test suite runs against the locked versions; Dependabot; avoid optional dependencies in v1 | Every Django upgrade |
+| R-09 | Django 6.1 extended support ends December 2027 | Certain | Medium | Move to Django 6.2 LTS (due April 2027, extended support to April 2030) before or at v1.0 | v1.0 |
+| R-10 | Name conflict: "Kami-Con" is an anime convention running since 2009 in Alabama; "Kami" is used by other products | Low | Medium | Search the Rwanda Development Board and USPTO registers before the v1.0 announcement; keep the domain and organisation names consistent | Before v1.0 announcement |
+| R-11 | Email domain list is wrong or incomplete (shared domains, alumni domains) | High | Medium | Domains are seeded only after confirmation by the institution; Platform Admin can mark a domain as staff-only or alumni | M1 |
+| R-12 | Scope creep back to four frontends, maps, wallet and community features | High | High | Roadmap lists them as post-v1; issues for them are labelled `post-v1` and closed from milestones | Every milestone review |
+| R-13 | Personal data enters the repository through fixtures, screenshots or issue reports | Medium | High | Seed data is synthetic and generated; issue templates warn; detect-secrets and review | Continuous |
+| R-14 | Kinyarwanda translation quality on gate messages | Medium | Medium | Fluent reviewer signs off on attendee strings; gate strings tested first | Before v1.0 |
+| R-15 | Mass email from a deployment marked as spam, so urgent changes are missed | Medium | Medium | Document SPF, DKIM and DMARC setup; in-app notification list as a second channel | M4 |
+| R-16 | Course cohorts generate low-quality PRs that the single maintainer cannot review | High | Medium | CODEOWNERS per track with student leads; cohort work in forks or a cohort branch; review rules in the playbook | Each cohort start |
+
+---
+
+## 6. Honest verdict on viability and scope
+
+**Should this exist?** As a general event platform, no. Luma, Eventbrite and local platforms such as Miobite (MTN Mobile Money, Airtel Money and QR e-tickets for events in Rwanda) already handle discovery and ticketing. As an academic conference system, no: Indico, built at CERN under the MIT licence, covers registration, timetables, abstracts and badge printing, and has an official check-in app.
+
+What none of them does is the combination at the centre of KamiKon: eligibility across institutions (four Access Policies driven by verified affiliations and Seat Pools), a gate pass that campus security can check without a network, and a self-hostable deployment that a Rwandan institution can keep in the country. That niche is real but narrow, and its bottleneck is institutional, not technical: universities must confirm their domains, appoint Approvers, and convince gate security to accept the pass. Code does not solve that.
+
+**As a portfolio and teaching project**, it is strong if the scope is cut. A well-run open-source repository with real CI, a signed release pipeline, a threat model and a data-protection guide demonstrates more than four half-built frontends. The original plan (Django templates, DRF API, Flutter and an SPA, plus Celery, Channels, Prometheus, Grafana and FCM, in 18 weeks with student teams) was not deliverable to production quality and would leave a maintainer with three duplicated UIs.
+
+**Recommendation.** Build v1.0 as defined in `docs/07_ROADMAP.md`: web app, PWA pass and scanner, email notifications, PostgreSQL only. Before milestone M3, secure one pilot university office and one Hub. If no partner signs up by then, keep the project as a portfolio and teaching reference, say so in the README, and do not build features that only a live deployment would justify.
+
+**What to borrow.**
+- pretix: the Ed25519 ticket scheme, the revocation list, and its documented offline trade-offs.
+- Indico: the Host hierarchy, and its check-in app as a reference for scanner UX.
+- Luma: the date-grouped list, already adopted in design_v3.
+
+**What to avoid.**
+- An AGPL-plus-attribution licence, the pretix and Hi.Events model: it is reasonable for those companies but hinders reuse in coursework, and the maintainer chose Apache-2.0.
+- Mobilizon's federation, which is out of proportion for a handful of institutions.
+- Multiple frontends before one is finished.
+
+---
+
+## 7. Open questions
+
+These need answers from the maintainer or from partners. Nothing in the specifications assumes an answer.
+
+| ID | Question | Blocks |
+| :--- | :--- | :--- |
+| Q-01 | The project brief's one-line description was left unfilled. Confirm the README one-liner, which is taken from the existing README. | README |
+| Q-02 | Which institution and which Hub will pilot, and what success metrics and targets will they accept (time to find an event, registration completion, share of passes scanned successfully at the gate)? | M3, PRD success metrics |
+| Q-03 | Who is the second maintainer or organisation owner? | v1.0 (R-03) |
+| Q-04 | Resolved 2026-10-23: `design_docs/` stays private; see C-21. | — |
+| Q-05 | Which email domains are confirmed by which institutions? None may be seeded until confirmed. | M1 seed data |
+| Q-06 | Who reviews the Kinyarwanda strings? | v1.0 Kinyarwanda |
+| Q-07 | Will the project run a public demo? If yes, who hosts it and under whose name (it must stay synthetic-only, ADR-0010)? | Demo |
+| Q-08 | Is the course cohort expected to contribute in this repository or in forks? | `docs/teaching/SPRINT_PLAYBOOK.md` |
+| Q-09 | Should the ID-photo review fallback for universities without student email be built in v1, given that it introduces image storage and moderation work? It is specified behind a feature flag, off by default. | M1 scope |
+| Q-10 | Trademark searches at the Rwanda Development Board and USPTO for "KamiKon": who performs them, and when? | v1.0 announcement |
+
+---
+
+## 8. Sources checked
+
+Verified means the reviewer read the statement in the cited source on 2026-10-23. Secondary means the statement comes from a summary, not the primary text.
+
+| Topic | Source | Status |
+| :--- | :--- | :--- |
+| Django supported versions and dates | https://www.djangoproject.com/download/ | Verified |
+| Django and Python version compatibility | https://docs.djangoproject.com/en/6.1/faq/install/ | Verified |
+| Django Tasks framework, no built-in worker | https://docs.djangoproject.com/en/6.1/topics/tasks/ | Verified |
+| `select_for_update()` ignored on SQLite | Django database notes, https://docs.djangoproject.com/en/6.1/ref/databases/ | Not re-read during this review; long-standing documented behaviour; confirm before ADR-0006 is cited externally |
+| Django locales shipped (no `rw`) | Django 6.1.2 package contents, `django/conf/locale` | Verified by listing |
+| Dependency licences and declared Django support | PyPI JSON metadata for each package listed in `docs/02_ARCHITECTURE.md` §9 | Verified |
+| django-tasks and django-tasks-db status | https://pypi.org/project/django-tasks/ , https://pypi.org/project/django-tasks-db/ | Verified |
+| Python `uuid.uuid7()` since 3.14 | https://docs.python.org/3/library/uuid.html | Verified |
+| Rwanda Law No. 058/2021, Articles 3, 9, 10, 29, 40, 43, 45, 47, 48, 50, 67 | https://rwandalii.org/akn/rw/act/law/2021/58/eng@2021-10-15 | Verified (primary) |
+| Same law, Articles 18 to 21 (rights and response times) | Official Gazette n° Special of 15/10/2021, https://archive.gazettes.africa/archive/rw/2021/rw-government-gazette-dated-2021-10-15-no-special.pdf | Verified (primary, partial) |
+| Articles 42, 11, 53 (information at collection, sensitive-data safeguards, fines) | https://www.dlapiperdataprotection.com/index.html?c=RW&t=law | Secondary |
+| Registration process, certificate in 30 working days, transitional period ended 15 Oct 2023 | https://dpo.gov.rw/faqs | Verified (supervisory authority's site) |
+| Ed25519 signature scheme and offline trade-offs | https://docs.pretix.eu/guides/ticket-secrets/ | Verified |
+| pretix licence model | https://docs.pretix.eu/trust/licensing/faq/ | Verified |
+| HMAC (RFC 2104), Ed25519 (RFC 8032), Base45 (RFC 9285) | IETF RFCs | Standards; not re-read during this review |
+| Indico features and licence | https://github.com/indico/indico ; check-in app: https://getindico.io/legacy-docs/wiki/apps/check-in.html | Verified (repository page); check-in app from Indico site listing |
+| Hi.Events licence and features | https://github.com/HiEventsDev/Hi.Events | Verified |
+| Mobilizon | https://joinmobilizon.org/en/ | Verified |
+| Miobite (Rwanda) | https://miobite.com/about | Verified (vendor's own claims) |
+| CampusGroups (commercial campus platform) | https://helpcenter.readyeducation.com/what-is-campusgroups | Search result only; not read |
+| Kami-Con | https://en.wikipedia.org/wiki/Kami-Con | Verified |
+| Redis licensing | https://redis.io/legal/licenses/ | Verified |
+| OSM tile usage policy | https://operations.osmfoundation.org/policies/tiles/ | Verified |
+| Apple Wallet pass signing | https://developer.apple.com/documentation/walletpasses/building-a-pass | Verified; membership fee not confirmed |
+| Google Wallet issuer onboarding | https://developers.google.com/wallet/generic/getting-started/issuer-onboarding | Verified |
+| GitHub "good first issue" label | https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/encouraging-helpful-contributions-to-your-project-with-labels | Verified |
+| GitHub private vulnerability reporting | https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/configuring-private-vulnerability-reporting-for-a-repository | Verified (how to enable) |
+| GitHub artifact attestations (Sigstore, SLSA v1.0 Build Level 2) | https://docs.github.com/en/actions/concepts/security/artifact-attestations | Verified |
+| OWASP ASVS 5.0.0 (30 May 2025) | https://asvs.owasp.org/ | Verified |
+| Contributor Covenant 3.0, CC BY-SA 4.0 | https://www.contributor-covenant.org/version/3/0/code_of_conduct/ | Verified |
+| Keep a Changelog 1.1.0 | https://keepachangelog.com/en/1.1.0/ | Verified |
+| CodeQL and secret scanning availability on public repositories | GitHub documentation | Unverified in this review; confirm in repository settings |
+| `andrew.cmu.edu` used across all of Carnegie Mellon | Reviewer knowledge | Unverified |
+| Browser support for Ed25519 in Web Crypto | Not checked | Unverified; see `docs/02_ARCHITECTURE.md` §6.6 |
+
+---
+
+## 9. Changes made in this review
+
+Files added: everything under `docs/` listed at the top of this document, plus `LICENSE`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `CHANGELOG.md`, `GOVERNANCE.md`, `.python-version`, `.github/ISSUE_TEMPLATE/feature_request.yml`.
+
+Files changed: `README.md`, `CONTRIBUTING.md`, `GLOSSARY.md`, `pyproject.toml` (licence metadata and Python bound), `uv.lock` (regenerated for the Python bound), `.github/ISSUE_TEMPLATE/config.yml` and `bug_report.yml` (emoji removed, contact links), `.github/pull_request_template.md` (coverage wording), `scripts/sprint_backlog.json` (US-2.1 and US-7.2 wording, labels), `scripts/setup_github_project.py` (prune list).
+
+Not changed and left for pull requests tracked in `docs/07_ROADMAP.md`: application code, `kamikon/settings.py`, CI workflows, the 29 existing GitHub issues.
