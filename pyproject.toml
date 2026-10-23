@@ -1,7 +1,12 @@
 [project]
 name = "kamikon"
 version = "0.1.0"
-requires-python = ">=3.14"
+description = "Inter-university academic event discovery, registration and offline gate passes for Rwanda."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+# Django 6.1.2 supports Python 3.12 to 3.14; 3.15 support arrives in 6.1.3.
+requires-python = ">=3.14,<3.15"
 dependencies = [
     "django>=6.1.2",
     "psycopg[binary]>=3.2",
@@ -12,7 +17,12 @@ dependencies = [
 "dev" = [
     "ruff",
     "pytest",
-    "pytest-django"
+    "pytest-django",
+    "pre-commit>=4.7.0",
+    "pytest-cov>=7.1.0",
+    "bandit>=1.9.4",
+    "pip-audit>=2.10.1",
+    "detect-secrets>=1.5.0",
 ]
 
 [tool.ruff]
@@ -31,3 +41,21 @@ exclude = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+DJANGO_SETTINGS_MODULE = "kamikon.settings"
+
+[tool.bandit]
+exclude_dirs = ["migrations", "venv", ".venv", "env", ".env", "tests"]
+
+[tool.coverage.run]
+source = ["apps", "kamikon"]
+# asgi.py/wsgi.py are Django deployment entrypoints exercised by a running
+# server, not by pytest; excluding them keeps the threshold about business
+# code, not framework boilerplate.
+omit = ["*/migrations/*", "kamikon/asgi.py", "kamikon/wsgi.py"]
+
+[tool.coverage.report]
+fail_under = 75
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+]
