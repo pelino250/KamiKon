@@ -24,7 +24,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - Backlog data: US-2.1 and US-7.2 use Access Policy terms; triage labels and `good first issue` added.
 - `setup_github_project.py --prune-default-labels` no longer deletes `good first issue` or `wontfix`.
 - `.gitignore` reduced from 717 template lines to the rules this project needs. It no longer ignores `scripts/`, which had kept `scripts/ci.py` (the CI entry point) out of the repository.
-- NFR-03 now states the accessibility floor and design checks directly; `design_docs/` stays private.
+- NFR-03 now states the accessibility floor and blocking design checks directly; `design_docs/` stays private.
 
 ### Removed
 - `requirements.txt`; `uv.lock` is the single source of dependencies.

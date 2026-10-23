@@ -18,7 +18,7 @@ Documents governed by this audit:
 | `docs/adr/` | Architecture decision records 0001 to 0011 |
 | `docs/teaching/SPRINT_PLAYBOOK.md` | Course-cohort process (sprints, board, DevOps Champion) |
 
-Superseded for engineering purposes: `design_docs/features_and_architecture.md` and `design_docs/agile_devops_roadmap.md`. `design_docs/` is the maintainer's private design workspace and is not published (Q-04). `design_v3.md` remains the visual design reference, except where section 2 below corrects it; the requirements contributors need from it are in `01_PRD.md` NFR-03.
+Superseded for engineering purposes: `design_docs/features_and_architecture.md` and `design_docs/agile_devops_roadmap.md`. `design_docs/` is the maintainer's private design workspace and is not published (Q-04). `design_v3.md` remains the visual design reference, except where section 2 below corrects it; its accessibility floor and blocking design checks are in `01_PRD.md` NFR-03. Colour and type tokens are not yet published (see M2-5).
 
 ---
 
@@ -125,7 +125,7 @@ Replacement: sign-up requires the user to confirm they are 16 or older. No date 
 
 **C-21. `design_docs/` is listed in README and CODEOWNERS, but `.gitignore` ignores it.**
 The public repository contains none of the design or architecture material, so outside contributors cannot see what they are building.
-Replacement: the specifications that contributors need now live in `docs/` and are tracked. `design_docs/` stays private (Q-04, resolved): it still carries material withdrawn by ADR-0008. The accessibility floor and blocking design checks moved into NFR-03, and CODEOWNERS no longer lists the path.
+Replacement: the specifications that contributors need now live in `docs/` and are tracked. `design_docs/` stays private (Q-04, resolved): it still carries material withdrawn by ADR-0008. The accessibility floor and blocking design checks moved into NFR-03, and CODEOWNERS no longer lists the path. The design tokens still need a public home before M2-5.
 
 **C-22. "A green local run predicts a green PR" (CONTRIBUTING §4).**
 Measured on 2026-10-23: `scripts/ci.py test` with `DEBUG=True` (the documented local setup) fails the coverage gate at 73.68 percent against a threshold of 75 percent. CI passes because it runs with `DEBUG=False` and PostgreSQL, which exercises different branches of `settings.py`. The two runs measure different code.
