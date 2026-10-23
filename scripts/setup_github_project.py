@@ -32,6 +32,7 @@ Usage
   python3 scripts/setup_github_project.py --start-date 2026-10-19
   GH_TOKEN=$(gh auth token --user <account>) python3 scripts/setup_github_project.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -48,9 +49,16 @@ DEFAULT_REPO = "pelino250/KamiKon"
 DEFAULT_DATA = Path(__file__).with_name("sprint_backlog.json")
 
 # GitHub's default labels, removed only when --prune-default-labels is passed.
+# "good first issue" and "wontfix" are kept: GitHub surfaces the first to new
+# contributors, and docs/agents/triage-labels.md uses the second.
 GITHUB_DEFAULT_LABELS = (
-    "bug", "documentation", "duplicate", "enhancement", "good first issue",
-    "help wanted", "invalid", "question", "wontfix",
+    "bug",
+    "documentation",
+    "duplicate",
+    "enhancement",
+    "help wanted",
+    "invalid",
+    "question",
 )
 
 
@@ -67,9 +75,7 @@ def log(msg: str = "") -> None:
 
 def gh(*args: str, stdin: str | None = None, check: bool = True) -> str:
     """Run a `gh` command and return stdout."""
-    proc = subprocess.run(
-        ["gh", *args], input=stdin, capture_output=True, text=True
-    )
+    proc = subprocess.run(["gh", *args], input=stdin, capture_output=True, text=True, check=False)
     if check and proc.returncode != 0:
         raise GhError(f"gh {' '.join(args[:3])} … failed:\n{proc.stderr.strip()}")
     return proc.stdout
@@ -146,8 +152,10 @@ def render_issue_body(item: dict, sprint: dict) -> str:
     dod = DOD_BY_TRACK.get(item["track"], DOD_BY_TRACK["default"])
     lines = [
         f"> **Sprint:** {sprint['title']}  ",
-        f"> **Track:** {item['track']} · **Story Points:** {item['points']} · "
-        f"**Priority:** {item['priority']}",
+        (
+            f"> **Track:** {item['track']} · **Story Points:** {item['points']} · "
+            f"**Priority:** {item['priority']}"
+        ),
         "",
         f"## {kind}",
         item["title"],
@@ -162,12 +170,16 @@ def render_issue_body(item: dict, sprint: dict) -> str:
         *[f"- [ ] {d}" for d in dod],
         "",
         "## Branch",
-        f"`{'devops' if item['id'].startswith('DO') else 'feat'}/<issue-number>-<short-description>`"
-        " — see CONTRIBUTING.md for naming and Conventional Commits.",
+        (
+            f"`{'devops' if item['id'].startswith('DO') else 'feat'}/<issue-number>-<short-description>`"
+            " — see CONTRIBUTING.md for naming and Conventional Commits."
+        ),
         "",
         "---",
-        f"<sub>Generated from `scripts/sprint_backlog.json` (ID `{item['id']}`). "
-        f"Keep the `[{item['id']}]` title prefix: the setup script uses it to stay idempotent.</sub>",
+        (
+            f"<sub>Generated from `scripts/sprint_backlog.json` (ID `{item['id']}`). "
+            f"Keep the `[{item['id']}]` title prefix: the setup script uses it to stay idempotent.</sub>"
+        ),
     ]
     return "\n".join(lines)
 
@@ -196,13 +208,27 @@ class Setup:
             if self.dry:
                 log(f"  [dry-run] upsert label {label['name']}")
                 continue
-            gh("label", "create", label["name"], "-R", self.repo,
-               "--color", label["color"], "--description", label["description"], "--force")
+            gh(
+                "label",
+                "create",
+                label["name"],
+                "-R",
+                self.repo,
+                "--color",
+                label["color"],
+                "--description",
+                label["description"],
+                "--force",
+            )
             log(f"  ✓ {label['name']}")
 
         if self.args.prune_default_labels:
-            existing = {l["name"] for l in gh_json(
-                "label", "list", "-R", self.repo, "--limit", "200", "--json", "name")}
+            existing = {
+                l["name"]
+                for l in gh_json(
+                    "label", "list", "-R", self.repo, "--limit", "200", "--json", "name"
+                )
+            }
             for name in GITHUB_DEFAULT_LABELS:
                 if name in existing:
                     if self.dry:
@@ -223,9 +249,12 @@ class Setup:
             start, days = self.schedule[sprint["number"]]
             due = start + dt.timedelta(days=days - 1)
             fields = [
-                "-f", f"title={sprint['title']}",
-                "-f", f"description=Milestone goal: {sprint['goal']}",
-                "-f", f"due_on={due.isoformat()}T23:59:59Z",
+                "-f",
+                f"title={sprint['title']}",
+                "-f",
+                f"description=Milestone goal: {sprint['goal']}",
+                "-f",
+                f"due_on={due.isoformat()}T23:59:59Z",
             ]
             number = existing.get(sprint["title"])
             if self.dry:
@@ -240,13 +269,23 @@ class Setup:
 
     # ---------------- issues ----------------
     def _existing_issues(self) -> dict[str, dict]:
-        issues = gh_json("issue", "list", "-R", self.repo, "--state", "all",
-                         "--limit", "1000", "--json", "number,title,url")
+        issues = gh_json(
+            "issue",
+            "list",
+            "-R",
+            self.repo,
+            "--state",
+            "all",
+            "--limit",
+            "1000",
+            "--json",
+            "number,title,url",
+        )
         by_id = {}
         for issue in issues or []:
             title = issue["title"]
             if title.startswith("[") and "]" in title:
-                by_id[title[1:title.index("]")]] = issue
+                by_id[title[1 : title.index("]")]] = issue
         return by_id
 
     def issues(self) -> None:
@@ -267,15 +306,42 @@ class Setup:
                     log(f"  [dry-run] {verb} issue {title[:90]}")
                     continue
                 if found:
-                    gh("issue", "edit", str(found["number"]), "-R", self.repo,
-                       "--title", title, "--body-file", "-", "--milestone", sprint["title"],
-                       *[a for l in item["labels"] for a in ("--add-label", l)], stdin=body)
+                    gh(
+                        "issue",
+                        "edit",
+                        str(found["number"]),
+                        "-R",
+                        self.repo,
+                        "--title",
+                        title,
+                        "--body-file",
+                        "-",
+                        "--milestone",
+                        sprint["title"],
+                        *[a for l in item["labels"] for a in ("--add-label", l)],
+                        stdin=body,
+                    )
                     self.issue_urls[item["id"]] = found["url"]
                     log(f"  ↻ updated #{found['number']} {item['id']}")
                 else:
-                    url = gh("issue", "create", "-R", self.repo, "--title", title,
-                             "--body-file", "-", "--milestone", sprint["title"],
-                             *label_args, stdin=body).strip().splitlines()[-1]
+                    url = (
+                        gh(
+                            "issue",
+                            "create",
+                            "-R",
+                            self.repo,
+                            "--title",
+                            title,
+                            "--body-file",
+                            "-",
+                            "--milestone",
+                            sprint["title"],
+                            *label_args,
+                            stdin=body,
+                        )
+                        .strip()
+                        .splitlines()[-1]
+                    )
                     self.issue_urls[item["id"]] = url
                     log(f"  ✓ created {item['id']} → {url}")
                     time.sleep(1)  # stay clear of GitHub's content-creation rate limit
@@ -290,19 +356,22 @@ class Setup:
                     raise SystemExit(
                         "\n✗ The active gh token lacks the 'project' scope.\n"
                         "  Run:  gh auth refresh -h github.com -s project\n"
-                        "  then re-run this script with --only project")
+                        "  then re-run this script with --only project"
+                    )
                 return
 
     def _find_or_create_project(self) -> tuple[str, int]:
         title = self.data["project"]["title"]
-        listing = gh_json("project", "list", "--owner", self.owner,
-                          "--format", "json", "--limit", "100")
+        listing = gh_json(
+            "project", "list", "--owner", self.owner, "--format", "json", "--limit", "100"
+        )
         for proj in listing.get("projects", []):
             if proj["title"] == title:
                 log(f"  • project exists: #{proj['number']} {title}")
                 return proj["id"], proj["number"]
-        proj = gh_json("project", "create", "--owner", self.owner,
-                       "--title", title, "--format", "json")
+        proj = gh_json(
+            "project", "create", "--owner", self.owner, "--title", title, "--format", "json"
+        )
         log(f"  ✓ created project #{proj['number']} {title}")
         return proj["id"], proj["number"]
 
@@ -319,10 +388,15 @@ class Setup:
 
     @staticmethod
     def _options_literal(options: list[dict]) -> str:
-        return "[" + ", ".join(
-            f"{{name: {gql_str(o['name'])}, color: {o.get('color', 'GRAY')}, "
-            f"description: {gql_str(o.get('description', ''))}}}"
-            for o in options) + "]"
+        return (
+            "["
+            + ", ".join(
+                f"{{name: {gql_str(o['name'])}, color: {o.get('color', 'GRAY')}, "
+                f"description: {gql_str(o.get('description', ''))}}}"
+                for o in options
+            )
+            + "]"
+        )
 
     def _create_single_select(self, project_id: str, name: str, options: list[dict]) -> None:
         graphql(f"""mutation {{ createProjectV2Field(input: {{
@@ -339,8 +413,8 @@ class Setup:
         wanted = [o["name"] for o in cfg["status_options"]]
         if [o["name"] for o in status["options"]] != wanted:
             graphql(f"""mutation {{ updateProjectV2Field(input: {{
-                fieldId: {gql_str(status['id'])},
-                singleSelectOptions: {self._options_literal(cfg['status_options'])} }})
+                fieldId: {gql_str(status["id"])},
+                singleSelectOptions: {self._options_literal(cfg["status_options"])} }})
                 {{ clientMutationId }} }}""")
             log(f"  ✓ Status columns → {' → '.join(wanted)}")
         else:
@@ -348,20 +422,38 @@ class Setup:
 
         palette = ["BLUE", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK", "RED", "GRAY"]
         priority_colors = ["RED", "ORANGE", "YELLOW", "GRAY"]
-        for name, values, colors in (("Track", cfg["tracks"], palette),
-                                     ("Priority", cfg["priorities"], priority_colors)):
+        for name, values, colors in (
+            ("Track", cfg["tracks"], palette),
+            ("Priority", cfg["priorities"], priority_colors),
+        ):
             if name in fields:
                 missing = set(values) - {o["name"] for o in fields[name]["options"]}
-                log(f"  • field '{name}' exists" +
-                    (f" (⚠ missing options: {sorted(missing)})" if missing else ""))
+                log(
+                    f"  • field '{name}' exists"
+                    + (f" (⚠ missing options: {sorted(missing)})" if missing else "")
+                )
             else:
-                self._create_single_select(project_id, name, [
-                    {"name": v, "color": colors[i % len(colors)], "description": ""}
-                    for i, v in enumerate(values)])
+                self._create_single_select(
+                    project_id,
+                    name,
+                    [
+                        {"name": v, "color": colors[i % len(colors)], "description": ""}
+                        for i, v in enumerate(values)
+                    ],
+                )
 
         if "Story Points" not in fields:
-            gh("project", "field-create", str(self.project_number), "--owner", self.owner,
-               "--name", "Story Points", "--data-type", "NUMBER")
+            gh(
+                "project",
+                "field-create",
+                str(self.project_number),
+                "--owner",
+                self.owner,
+                "--name",
+                "Story Points",
+                "--data-type",
+                "NUMBER",
+            )
             log("  ✓ field 'Story Points' (number — Fibonacci 1, 2, 3, 5, 8)")
         else:
             log("  • field 'Story Points' exists")
@@ -377,10 +469,11 @@ class Setup:
         sprints = self.data["sprints"]
         first_start, first_days = self.schedule[sprints[0]["number"]]
         iterations = ", ".join(
-            f"{{title: {gql_str('Sprint %d' % s['number'])}, "
+            f"{{title: {gql_str(f'Sprint {s["number"]}')}, "
             f"startDate: {gql_str(self.schedule[s['number']][0].isoformat())}, "
             f"duration: {self.schedule[s['number']][1]}}}"
-            for s in sprints)
+            for s in sprints
+        )
         try:
             graphql(f"""mutation {{ createProjectV2Field(input: {{
                 projectId: {gql_str(project_id)}, dataType: ITERATION, name: "Sprint",
@@ -391,9 +484,14 @@ class Setup:
         except GhError as exc:
             log(f"  ⚠ iteration field not supported by this API ({str(exc)[:120]}…)")
             log("    falling back to a single-select 'Sprint' field")
-            self._create_single_select(project_id, "Sprint", [
-                {"name": f"Sprint {s['number']}", "color": "BLUE", "description": s["title"]}
-                for s in sprints])
+            self._create_single_select(
+                project_id,
+                "Sprint",
+                [
+                    {"name": f"Sprint {s['number']}", "color": "BLUE", "description": s["title"]}
+                    for s in sprints
+                ],
+            )
 
     def _project_items(self, project_id: str) -> dict[str, str]:
         """Return {issue_url: item_id} for items already on the board."""
@@ -422,39 +520,69 @@ class Setup:
                 return it["id"]
         return None
 
-    def _set_item_fields(self, project_id: str, item_id: str, values: list[tuple[dict, str]]) -> None:
+    def _set_item_fields(
+        self, project_id: str, item_id: str, values: list[tuple[dict, str]]
+    ) -> None:
         """values: [(field, graphql value literal)] — all set in one aliased mutation."""
         parts = [
             f"f{i}: updateProjectV2ItemFieldValue(input: {{ projectId: {gql_str(project_id)}, "
             f"itemId: {gql_str(item_id)}, fieldId: {gql_str(field['id'])}, value: {val} }})"
             f" {{ clientMutationId }}"
-            for i, (field, val) in enumerate(values)]
+            for i, (field, val) in enumerate(values)
+        ]
         graphql("mutation { " + " ".join(parts) + " }")
 
     def project(self) -> None:
         log("\n== GitHub Project (v2) ==")
         if self.dry:
-            log(f"  [dry-run] find/create project '{self.data['project']['title']}' "
+            log(
+                f"  [dry-run] find/create project '{self.data['project']['title']}' "
                 f"for {self.owner}, configure Status/Track/Priority/Story Points/Sprint, "
-                f"link to {self.repo}, add {sum(len(s['items']) for s in self.data['sprints'])} issues")
+                f"link to {self.repo}, add {sum(len(s['items']) for s in self.data['sprints'])} issues"
+            )
             return
         self._check_project_scope()
         project_id, self.project_number = self._find_or_create_project()
 
         cfg = self.data["project"]
-        readme = (Path(__file__).with_name("PROJECT_README.md").read_text()
-                  if Path(__file__).with_name("PROJECT_README.md").exists() else "")
-        edit_args = ["project", "edit", str(self.project_number), "--owner", self.owner,
-                     "--description", cfg["description"]]
+        readme = (
+            Path(__file__).with_name("PROJECT_README.md").read_text()
+            if Path(__file__).with_name("PROJECT_README.md").exists()
+            else ""
+        )
+        edit_args = [
+            "project",
+            "edit",
+            str(self.project_number),
+            "--owner",
+            self.owner,
+            "--description",
+            cfg["description"],
+        ]
         if readme:
             edit_args += ["--readme", readme]
         gh(*edit_args)
 
-        link = subprocess.run(["gh", "project", "link", str(self.project_number),
-                               "--owner", self.owner, "--repo", self.repo_name],
-                              capture_output=True, text=True)
-        log("  ✓ linked to repository" if link.returncode == 0
-            else f"  • link: {link.stderr.strip() or 'already linked'}")
+        link = subprocess.run(
+            [
+                "gh",
+                "project",
+                "link",
+                str(self.project_number),
+                "--owner",
+                self.owner,
+                "--repo",
+                self.repo_name,
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        log(
+            "  ✓ linked to repository"
+            if link.returncode == 0
+            else f"  • link: {link.stderr.strip() or 'already linked'}"
+        )
 
         fields = self._ensure_fields(project_id)
 
@@ -473,52 +601,90 @@ class Setup:
                 if url in on_board and not self.args.update_existing:
                     log(f"  • {item['id']} already on board (fields left untouched)")
                     continue
-                item_id = on_board.get(url) or gh_json(
-                    "project", "item-add", str(self.project_number), "--owner", self.owner,
-                    "--url", url, "--format", "json")["id"]
+                item_id = (
+                    on_board.get(url)
+                    or gh_json(
+                        "project",
+                        "item-add",
+                        str(self.project_number),
+                        "--owner",
+                        self.owner,
+                        "--url",
+                        url,
+                        "--format",
+                        "json",
+                    )["id"]
+                )
 
-                status_name = (cfg["first_sprint_status"] if sprint["number"] == first_sprint
-                               else cfg["default_status"])
+                status_name = (
+                    cfg["first_sprint_status"]
+                    if sprint["number"] == first_sprint
+                    else cfg["default_status"]
+                )
                 values = []
-                for fname, opt_name in (("Status", status_name), ("Track", item["track"]),
-                                        ("Priority", item["priority"]),
-                                        ("Sprint", f"Sprint {sprint['number']}")):
+                for fname, opt_name in (
+                    ("Status", status_name),
+                    ("Track", item["track"]),
+                    ("Priority", item["priority"]),
+                    ("Sprint", f"Sprint {sprint['number']}"),
+                ):
                     field = fields.get(fname)
                     opt = self._option_id(field, opt_name) if field else None
                     if not opt:
                         log(f"    ⚠ {item['id']}: no '{opt_name}' option on field '{fname}'")
                         continue
-                    key = "iterationId" if field["dataType"] == "ITERATION" else "singleSelectOptionId"
+                    key = (
+                        "iterationId"
+                        if field["dataType"] == "ITERATION"
+                        else "singleSelectOptionId"
+                    )
                     values.append((field, f"{{{key}: {gql_str(opt)}}}"))
                 if "Story Points" in fields:
                     values.append((fields["Story Points"], f"{{number: {float(item['points'])}}}"))
                 self._set_item_fields(project_id, item_id, values)
-                log(f"  ✓ {item['id']} · {status_name} · {item['track']} · "
-                    f"{item['priority']} · {item['points']} pts · Sprint {sprint['number']}")
+                log(
+                    f"  ✓ {item['id']} · {status_name} · {item['track']} · "
+                    f"{item['priority']} · {item['points']} pts · Sprint {sprint['number']}"
+                )
 
         log(f"\n  Board: https://github.com/users/{self.owner}/projects/{self.project_number}")
-        log("  Note: Board / Table / Roadmap *views* cannot be created via the API —"
-            " add them once in the UI (see scripts/PROJECT_README.md).")
+        log(
+            "  Note: Board / Table / Roadmap *views* cannot be created via the API —"
+            " add them once in the UI (see scripts/PROJECT_README.md)."
+        )
 
 
 # --------------------------------------------------------------------------- #
 # Entry point
 # --------------------------------------------------------------------------- #
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("--repo", default=DEFAULT_REPO, help=f"owner/name (default {DEFAULT_REPO})")
     p.add_argument("--data", type=Path, default=DEFAULT_DATA, help="backlog JSON file")
-    p.add_argument("--start-date", type=dt.date.fromisoformat,
-                   default=next_monday(dt.date.today()),
-                   help="Sprint 0 start date, YYYY-MM-DD (default: next Monday)")
-    p.add_argument("--only", default=",".join(PHASES),
-                   help=f"comma-separated phases to run: {', '.join(PHASES)}")
+    p.add_argument(
+        "--start-date",
+        type=dt.date.fromisoformat,
+        default=next_monday(dt.date.today()),
+        help="Sprint 0 start date, YYYY-MM-DD (default: next Monday)",
+    )
+    p.add_argument(
+        "--only",
+        default=",".join(PHASES),
+        help=f"comma-separated phases to run: {', '.join(PHASES)}",
+    )
     p.add_argument("--dry-run", action="store_true", help="print actions without changing GitHub")
-    p.add_argument("--update-existing", action="store_true",
-                   help="refresh existing issues and board items from the JSON (resets field values)")
-    p.add_argument("--prune-default-labels", action="store_true",
-                   help="delete GitHub's default labels (bug, enhancement, …)")
+    p.add_argument(
+        "--update-existing",
+        action="store_true",
+        help="refresh existing issues and board items from the JSON (resets field values)",
+    )
+    p.add_argument(
+        "--prune-default-labels",
+        action="store_true",
+        help="delete GitHub's default labels (bug, enhancement, …)",
+    )
     args = p.parse_args()
     args.phases = [x.strip() for x in args.only.split(",") if x.strip()]
     unknown = set(args.phases) - set(PHASES)
@@ -536,9 +702,11 @@ def main() -> int:
 
     total = sum(len(s["items"]) for s in data["sprints"])
     log(f"KamiKon GitHub setup → {args.repo}")
-    log(f"  {len(data['sprints'])} sprints · {total} backlog items · "
+    log(
+        f"  {len(data['sprints'])} sprints · {total} backlog items · "
         f"Sprint 0 starts {args.start_date} · phases: {', '.join(args.phases)}"
-        + (" · DRY RUN" if args.dry_run else ""))
+        + (" · DRY RUN" if args.dry_run else "")
+    )
 
     setup = Setup(args, data)
     try:

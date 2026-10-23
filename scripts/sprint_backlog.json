@@ -48,8 +48,14 @@
     { "name": "comp:mobile", "color": "BFDADC", "description": "Flutter mobile companion app" },
     { "name": "comp:spa", "color": "BFDADC", "description": "React / Angular single-page app" },
 
-    { "name": "good-first-issue", "color": "7057FF", "description": "Good entry point for a new contributor" },
-    { "name": "pair-programming-recommended", "color": "FBCA04", "description": "Complex enough to benefit from pairing" }
+    { "name": "good first issue", "color": "7057FF", "description": "Good entry point for a new contributor" },
+    { "name": "pair-programming-recommended", "color": "FBCA04", "description": "Complex enough to benefit from pairing" },
+    { "name": "post-v1", "color": "BFD4F2", "description": "Planned after v1.0; not on a milestone" },
+    { "name": "needs-triage", "color": "FBCA04", "description": "Maintainer needs to evaluate this issue" },
+    { "name": "needs-info", "color": "FEF2C0", "description": "Waiting on reporter for more information" },
+    { "name": "ready-for-agent", "color": "C2E0C6", "description": "Fully specified, ready for an AFK agent" },
+    { "name": "ready-for-human", "color": "0E8A16", "description": "Requires human implementation" },
+    { "name": "wontfix", "color": "FFFFFF", "description": "Will not be actioned" }
   ],
 
   "sprints": [
@@ -63,7 +69,7 @@
           "id": "US-0.1",
           "title": "Generate UI/UX wireframes & high-fidelity mockups using design.md prompts in Google Stitch",
           "track": "Frontend (UI/UX)", "points": 3, "priority": "P1 - High",
-          "labels": ["type:feature", "comp:design", "good-first-issue"],
+          "labels": ["type:feature", "comp:design", "good first issue"],
           "acceptance": [
             "Exported screens for Feed, Event Detail, QR Pass, and Organizer Dashboard are committed or linked in `docs/`."
           ]
@@ -111,7 +117,7 @@
           "id": "US-1.1",
           "title": "As a platform admin, I want to manage Universities, Campuses (e.g., UR-CST, CMU-Africa, ALU, AUCA), and Venues with GPS coordinates",
           "track": "Backend (Django/API)", "points": 5, "priority": "P0 - Critical",
-          "labels": ["type:feature", "comp:institutions", "good-first-issue"],
+          "labels": ["type:feature", "comp:institutions", "good first issue"],
           "acceptance": [
             "Django models and migrations exist for University, Campus and Venue.",
             "Management command `seed_rwandan_campuses` pre-populates Kigali universities."
@@ -159,7 +165,7 @@
       "items": [
         {
           "id": "US-2.1",
-          "title": "As an organizer, I want to create an academic event and set its Access Scope (`Open to All Universities`, `Host University Only`, `Hybrid`)",
+          "title": "As an organizer, I want to create an academic event and set its Access Policy (`PUBLIC_COMMUNITY`, `OPEN_ALL_UNIVERSITIES`, `INSTITUTION_ONLY`, `CAMPUS_ONLY`) and Delivery Mode (`IN_PERSON`, `ONLINE`, `HYBRID`)",
           "track": "Backend (Django/API)", "points": 5, "priority": "P0 - Critical",
           "labels": ["type:feature", "comp:events"],
           "acceptance": [
@@ -173,8 +179,8 @@
           "track": "Frontend (UI/UX)", "points": 8, "priority": "P1 - High",
           "labels": ["type:feature", "comp:discovery"],
           "acceptance": [
-            "Implements `design.md` tokens (`#0F172A`, `#1E40AF`, `#0D9488`).",
-            "Uses `<UniversityBadge />` and `<AccessScopePill />` components.",
+            "Implements the design tokens in `design_docs/design_v3.md` §2 as CSS custom properties.",
+            "Uses `<UniversityBadge />` and `<AccessPolicyPill />` components.",
             "HTMX provides instant filtering."
           ]
         },
@@ -392,7 +398,7 @@
         },
         {
           "id": "US-7.2",
-          "title": "Build Component Library (`<EventCard />`, `<UniversityBadge />`, `<AccessScopePill />`, `<FilterSidebar />`, `<KigaliCampusMap />`)",
+          "title": "Build Component Library (`<EventCard />`, `<UniversityBadge />`, `<AccessPolicyPill />`, `<FilterSidebar />`, `<KigaliCampusMap />`)",
           "track": "SPA (React/Angular)", "points": 8, "priority": "P1 - High",
           "labels": ["type:feature", "comp:spa", "comp:design"],
           "acceptance": [
