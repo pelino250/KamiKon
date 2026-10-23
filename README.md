@@ -31,15 +31,15 @@ This quick start uses SQLite and exists only until the Docker Compose setup land
 
 | Read this | For |
 | :--- | :--- |
-| [docs/00_DECISIONS_AND_AUDIT.md](docs/00_DECISIONS_AND_AUDIT.md) | Decisions, risks, open questions and sources; start here |
-| [docs/01_PRD.md](docs/01_PRD.md) | What v1.0 does and does not do |
+| [docs/01_PRD.md](docs/01_PRD.md) | What v1.0 does and does not do; start here |
 | [docs/02_ARCHITECTURE.md](docs/02_ARCHITECTURE.md) | Components, data model, eligibility, gate pass format |
 | [docs/03_API_SPEC.md](docs/03_API_SPEC.md) | Web routes and `/api/v1/` |
 | [docs/04_THREAT_MODEL.md](docs/04_THREAT_MODEL.md) | Security model |
 | [docs/05_DATA_PROTECTION.md](docs/05_DATA_PROTECTION.md) | Obligations for deployers (Rwanda Law No. 058/2021) |
 | [docs/06_CI_CD_AND_RELEASES.md](docs/06_CI_CD_AND_RELEASES.md) | Checks, supply chain, versioning |
-| [docs/07_ROADMAP.md](docs/07_ROADMAP.md) | Milestones and definition of done for v1.0 |
+| [docs/07_ROADMAP.md](docs/07_ROADMAP.md) | Milestones, definition of done, risks and open questions |
 | [docs/adr/](docs/adr/) | Architecture decision records |
+| [docs/history/](docs/history/) | Dated records such as the 2026-10-23 design review, cited as C-, D- and X- IDs |
 | [GLOSSARY.md](GLOSSARY.md) | Domain vocabulary used everywhere |
 
 ## Repository layout
@@ -50,7 +50,7 @@ kamikon/     Django project package (settings, URLs, ASGI/WSGI)
 apps/        Django apps (accounts, events, tickets, ...)
 tests/       Test suite
 docs/        Specifications, ADRs, teaching playbook
-scripts/     CI entry point and GitHub project automation
+scripts/     GitHub project and backlog automation
 ```
 
 ## Contributing

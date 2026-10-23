@@ -1,6 +1,6 @@
 # 03 — Interface Specification (v1.0)
 
-Status: draft for v1.0. The machine-readable contract is the OpenAPI document generated at `/api/v1/schema/`; where it disagrees with this file after M1, the generated schema is fixed to match this file or this file is amended in the same pull request.
+Status: draft for v1.0, written before the API exists. Once an endpoint is implemented, the OpenAPI document generated at `/api/v1/schema/` is the contract for it, and this file keeps only the conventions in §1 and the rate limits in §4. A pull request that changes an endpoint updates the schema; it changes this file only if it changes a convention.
 
 ## 1. Conventions
 
@@ -160,16 +160,3 @@ For `ALREADY_USED`, `first_used_at` is set. `holder` is omitted for `BAD_SIGNATU
 | Registration POST | 10 per minute per user |
 | Scanner scans | 120 per minute per device |
 | Export | 1 per hour per user |
-
-## 5. Changes from the earlier endpoint table
-
-| Earlier (features doc §5) | Now | Reason |
-| :--- | :--- | :--- |
-| `POST /api/v1/auth/register/`, `POST /api/v1/auth/token/` | Removed; web sign-up through allauth | No token clients in v1 (ADR-0005) |
-| `GET /api/v1/institutions/campuses/` | Not in v1 | Only needed by the map (v1.1) |
-| `POST /api/v1/events/` | Not in v1 | Organizers use the web forms |
-| `POST /api/v1/events/{slug}/rsvp/` | `POST /api/v1/events/{slug}/registrations/` | Resource naming; the glossary term is Registration |
-| `GET /api/v1/tickets/my-passes/` | `GET /api/v1/me/passes/` | Consistent `me` namespace |
-| `POST /api/v1/tickets/verify-qr/` | `POST /api/v1/scanner/events/{slug}/scans/` and `/batch/` | Scans are scoped to one Event; offline batch upload |
-| `PATCH /api/v1/notifications/preferences/` with FCM token | Web form; no FCM | No push in v1 |
-| `?access=PUBLIC_COMMUNITY` filter | `eligible=true` | Users care whether they can attend, not about the policy name |

@@ -8,10 +8,10 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | ID | Item | Exit criterion |
 | :--- | :--- | :--- |
 | M0-1 | Repository hygiene files (this change): LICENSE, CODE_OF_CONDUCT, SECURITY, CHANGELOG, GOVERNANCE, docs | Merged |
-| M0-2 | Docker Compose for development: `web`, `worker`, `db` (PostgreSQL 17), `mailpit`; `make up` or `docker compose up` is the one command | A newcomer reaches the admin login and a green `scripts/ci.py test` in under 10 minutes on a clean machine (G-5) |
+| M0-2 | Docker Compose for development: `web`, `worker`, `db` (PostgreSQL 17), `mailpit`; `make up` or `docker compose up` is the one command | A newcomer reaches the admin login and a green `uv run pytest` in under 10 minutes on a clean machine (G-5) |
 | M0-3 | Settings: `DATABASE_URL` and `EMAIL_URL`, decoupled from `DEBUG`; local-socket exception to `sslmode=require` | Existing settings tests extended and passing |
 | M0-4 | Replace the custom `User` with the email-login model in §4.2 of the architecture, with `public_id`; regenerate `0001_initial` (no data exists) | Migration check passes; allauth sign-up works |
-| M0-5 | `deploy-check` stage | In CI |
+| M0-5 | Deploy check (`manage.py check --deploy`) in the `checks` job | In CI |
 | M0-6 | Move repository to a GitHub organisation with two owners | R-03 mitigated |
 
 ### M1 — Institutions and identity
@@ -45,7 +45,7 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | M3-4 | Scanner PWA with bundle, online and offline scans, batch upload, conflicts (FR-45 to FR-47) | Playwright test of the offline path |
 | M3-5 | Roster export (FR-48) | Audit entry per export |
 | M3-6 | ADR for browser Ed25519 and QR decoding libraries (architecture §6.6) | Merged before M3-4 |
-| M3-7 | Pilot partner confirmed (R-01, R-02, Q-02) | Named partner; otherwise follow the fallback in `00_DECISIONS_AND_AUDIT.md` §6 |
+| M3-7 | Pilot partner confirmed (R-01, R-02, Q-02) | Named partner; otherwise follow the fallback in `history/2026-10-23-review.md` §6 |
 
 ### M4 — Notifications
 FR-50 to FR-54, SPF, DKIM and DMARC guidance, digest scheduling.
@@ -80,9 +80,9 @@ Each starts only after v1.0 and with its own ADR: map view (v1.1); a native clie
 
 Each of these is small, documented, and touches a single module. Label them `good first issue`.
 
-- Add `deploy-check` as a stage in `scripts/ci.py` with a test in `tests/test_ci_script.py`.
+- Add `manage.py check --deploy` with production settings as a step in the `checks` job of `.github/workflows/ci.yml`.
 - Add the local-socket exception to the database TLS rule, with a settings test.
-- Add a `make` or `just` file with `up`, `test` and `ci` targets that wrap `docker compose` and `scripts/ci.py`.
+- Add a `make` or `just` file with `up`, `test` and `ci` targets that wrap `docker compose`, `pre-commit` and `pytest`.
 - Write the `seed_demo` synthetic name generator (no real names; fictional organisations).
 - Add the problem-details error handler for DRF (`03_API_SPEC.md` §1).
 - Add translations scaffolding: the `rw` entry in `LANGUAGES` with `LANG_INFO`, and `makemessages` in CI.
@@ -95,7 +95,7 @@ Each of these is small, documented, and touches a single module. Label them `goo
 | Events and discovery | `apps/events`, `apps/discovery` | Filters and templates |
 | Passes and scanning | `apps/tickets`, `static/pwa/` | Pass format test vectors |
 | Notifications | `apps/notifications`, `templates/email/` | Email templates |
-| DevOps | `.github/`, `scripts/`, `docker/`, `compose*.yaml` | CI stages |
+| DevOps | `.github/`, `scripts/`, `docker/`, `compose*.yaml` | CI workflow |
 
 ## 6. Bus factor and maintenance
 
@@ -110,22 +110,61 @@ The 29 open GitHub issues were created from `scripts/sprint_backlog.json`. Apply
 | Issue ID | Change | Reason |
 | :--- | :--- | :--- |
 | US-0.1 | Close as done or keep for design_v3 screens only | Stitch prompts v3 exist |
-| US-0.2 | Close as superseded | C-25 |
+| US-0.2 | Close as superseded | review C-25 |
 | DO-0.3 | Retitle to M0-2; services `web`, `worker`, `db`, `mailpit`; no Redis or Celery | ADR-0007 |
 | DO-0.4 | Close as done | CI exists |
 | US-1.1 | Split into M1-1 and M1-2 | Scope and synthetic seed |
-| US-1.2 | Rewrite to M1-3 | C-04 |
+| US-1.2 | Rewrite to M1-3 | review C-04 |
 | US-1.3 | Close; replaced by session auth and the `/api/v1/` scope in `03_API_SPEC.md` | ADR-0005 |
-| DO-1.4 | Close as done for Bandit, pip-audit and detect-secrets; CodeQL moves to M1-7 | C-28 |
-| US-2.1 | Title corrected to Access Policy and Delivery Mode (JSON updated) | C-12 |
+| DO-1.4 | Close as done for Bandit, pip-audit and detect-secrets; CodeQL moves to M1-7 | review C-28 |
+| US-2.1 | Title corrected to Access Policy and Delivery Mode (JSON updated) | review C-12 |
 | US-2.2 | Remove the design v1 colour values; reference design_v3 tokens | design_v3 replaces v1 |
-| US-2.3 | Move to post-v1 (map, v1.1) | C-16 |
+| US-2.3 | Move to post-v1 (map, v1.1) | review C-16 |
 | DO-2.4 | Keep as M2-6 | |
-| US-3.1 to US-3.3 | Rewrite to M3-1 to M3-5; remove "Student ID number" and HMAC from criteria | C-01, C-06 |
-| DO-3.4 | Rewrite: staging on synthetic data only | C-15 |
-| US-4.1, US-4.2 | Keep within M4; email and in-app only | C-14 |
+| US-3.1 to US-3.3 | Rewrite to M3-1 to M3-5; remove "Student ID number" and HMAC from criteria | review C-01, review C-06 |
+| DO-3.4 | Rewrite: staging on synthetic data only | review C-15 |
+| US-4.1, US-4.2 | Keep within M4; email and in-app only | review C-14 |
 | DO-4.3 | Reduce to health endpoints and structured logs in v1; Prometheus and Grafana post-v1 | Scope |
 | US-5.1 | Replace with database query optimisation and per-view caching only if NFR-01 fails | No Redis in v1 |
 | DO-5.2, DO-5.3 | Keep as M5-1 and M5-3 | |
-| US-6.x, DO-6.4, US-7.x, DO-7.3 | Label `post-v1`, remove milestones | D-03 |
-| US-7.2 | Component name corrected to `<AccessPolicyPill />` (JSON updated) | C-12 |
+| US-6.x, DO-6.4, US-7.x, DO-7.3 | Label `post-v1`, remove milestones | review D-03 |
+| US-7.2 | Component name corrected to `<AccessPolicyPill />` (JSON updated) | review C-12 |
+
+## 8. Risks
+
+Likelihood and impact are rated Low, Medium or High. A gate is the point in the roadmap where the mitigation must be in place before work continues.
+
+| ID | Risk | Likelihood | Impact | Mitigation | Gate |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| R-01 | No institution adopts it; the platform has no events and no users | High | High | Recruit one university office and one Hub as pilot partners before building registration; define success metrics with them (Q-02) | Before M3 starts |
+| R-02 | Campus security does not accept KamiKon passes, so the gate pass has no value | Medium | High | Pilot with a named security office; the roster export works even without scanning | Before M3 ends |
+| R-03 | Bus factor of one: the maintainer becomes unavailable | High | High | Move the repository to a GitHub organisation with a second owner; document release and key procedures; appoint a second maintainer before v1.0 | Before v1.0 |
+| R-04 | Signing key leaked or lost | Low | High | Key only on the server, loaded from a secret file; key ID in every pass; rotation and revocation runbook; tests that scanners reject unknown key IDs | Before M3 ends |
+| R-05 | Duplicate entry through offline scanning | Medium | Medium | Online-first scanning; post-sync conflict report; single-device mode documented for strict gates | Before M3 ends |
+| R-06 | Deployer stores data abroad or sends it to foreign SaaS without authorisation (Art. 48, 50) | High | High (for the deployer) | Telemetry off by default; `docs/05_DATA_PROTECTION.md` checklist; deployment guide states the obligation in the first section | Before v1.0 |
+| R-07 | `django-tasks-db` (beta, PyPI classifiers list Django 5.2 and 6.0 only) breaks on Django 6.1 or 6.2 | Medium | Medium | Integration test of enqueue plus worker in CI; application code only uses `django.tasks`; fallback backend is Celery with Valkey | M1 (first task) and every Django minor upgrade |
+| R-08 | Other dependencies lag Django releases (`drf-spectacular`, `whitenoise`, `django-cors-headers`, `django-prometheus` classifiers stop at 6.0) | Medium | Low | Test suite runs against the locked versions; Dependabot; avoid optional dependencies in v1 | Every Django upgrade |
+| R-09 | Django 6.1 extended support ends December 2027 | Certain | Medium | Move to Django 6.2 LTS (due April 2027, extended support to April 2030) before or at v1.0 | v1.0 |
+| R-10 | Name conflict: "Kami-Con" is an anime convention running since 2009 in Alabama; "Kami" is used by other products | Low | Medium | Search the Rwanda Development Board and USPTO registers before the v1.0 announcement; keep the domain and organisation names consistent | Before v1.0 announcement |
+| R-11 | Email domain list is wrong or incomplete (shared domains, alumni domains) | High | Medium | Domains are seeded only after confirmation by the institution; Platform Admin can mark a domain as staff-only or alumni | M1 |
+| R-12 | Scope creep back to four frontends, maps, wallet and community features | High | High | Roadmap lists them as post-v1; issues for them are labelled `post-v1` and closed from milestones | Every milestone review |
+| R-13 | Personal data enters the repository through fixtures, screenshots or issue reports | Medium | High | Seed data is synthetic and generated; issue templates warn; detect-secrets and review | Continuous |
+| R-14 | Kinyarwanda translation quality on gate messages | Medium | Medium | Fluent reviewer signs off on attendee strings; gate strings tested first | Before v1.0 |
+| R-15 | Mass email from a deployment marked as spam, so urgent changes are missed | Medium | Medium | Document SPF, DKIM and DMARC setup; in-app notification list as a second channel | M4 |
+| R-16 | Course cohorts generate low-quality PRs that the single maintainer cannot review | High | Medium | CODEOWNERS per track with student leads; cohort work in forks or a cohort branch; review rules in the playbook | Each cohort start |
+
+## 9. Open questions
+
+These need answers from the maintainer or from partners. Nothing in the specifications assumes an answer.
+
+| ID | Question | Blocks |
+| :--- | :--- | :--- |
+| Q-01 | The project brief's one-line description was left unfilled. Confirm the README one-liner, which is taken from the existing README. | README |
+| Q-02 | Which institution and which Hub will pilot, and what success metrics and targets will they accept (time to find an event, registration completion, share of passes scanned successfully at the gate)? | M3, PRD success metrics |
+| Q-03 | Who is the second maintainer or organisation owner? | v1.0 (R-03) |
+| Q-05 | Which email domains are confirmed by which institutions? None may be seeded until confirmed. | M1 seed data |
+| Q-06 | Who reviews the Kinyarwanda strings? | v1.0 Kinyarwanda |
+| Q-07 | Will the project run a public demo? If yes, who hosts it and under whose name (it must stay synthetic-only, ADR-0010)? | Demo |
+| Q-08 | Is the course cohort expected to contribute in this repository or in forks? | `docs/teaching/SPRINT_PLAYBOOK.md` |
+| Q-09 | Should the ID-photo review fallback for universities without student email be built in v1, given that it introduces image storage and moderation work? It is specified behind a feature flag, off by default. | M1 scope |
+| Q-10 | Trademark searches at the Rwanda Development Board and USPTO for "KamiKon": who performs them, and when? | v1.0 announcement |

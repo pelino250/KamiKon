@@ -1,6 +1,6 @@
 # 01 — Product Requirements (v1.0)
 
-Status: draft for v1.0. Decisions referenced as D-nn, risks as R-nn and questions as Q-nn are defined in `00_DECISIONS_AND_AUDIT.md`. Domain terms follow `GLOSSARY.md`.
+Status: draft for v1.0. Risks (R-nn) and open questions (Q-nn) are in `07_ROADMAP.md`; review IDs (C-nn, D-nn) are in `history/2026-10-23-review.md`. Domain terms follow `GLOSSARY.md`.
 
 ## 1. Summary
 
@@ -49,8 +49,8 @@ Priority: P0 must ship in v1.0; P1 should ship; P2 is v1.1 or later.
 | ID | Requirement | Priority | Acceptance criteria |
 | :--- | :--- | :--- | :--- |
 | FR-10 | Sign up with email and password; email is the login identifier | P0 | Account inactive for registration until the email is confirmed by a single-use link; passwords checked by Django validators |
-| FR-11 | Age confirmation | P0 | Sign-up requires confirming the user is 16 or older (D-20); no date of birth stored |
-| FR-12 | Add a university affiliation by proving control of an institutional mailbox | P0 | A code or link sent to the address; on success the Affiliation is `VERIFIED` with `expires_at` 12 months later (D-06) |
+| FR-11 | Age confirmation | P0 | Sign-up requires confirming the user is 16 or older (review D-20); no date of birth stored |
+| FR-12 | Add a university affiliation by proving control of an institutional mailbox | P0 | A code or link sent to the address; on success the Affiliation is `VERIFIED` with `expires_at` 12 months later (review D-06) |
 | FR-13 | Choose a home Campus within the verified University | P0 | Self-declared; changeable at most once every 90 days; Campus Approvers can revoke the campus claim |
 | FR-14 | Re-verification | P0 | Reminder email 30 days before expiry; on expiry the Affiliation becomes `EXPIRED` and the user is treated as a Community Guest |
 | FR-15 | Community Guest profile: display name, optional organization and role label | P0 | Shown to Organizers on the roster only |
@@ -78,7 +78,7 @@ Priority: P0 must ship in v1.0; P1 should ship; P2 is v1.1 or later.
 | FR-31 | Filters: date range, University or Hub, Delivery Mode, tag | P0 | Combinable; reflected in the URL |
 | FR-32 | Full-text search over title, abstract, speakers, Host name | P1 | PostgreSQL full-text search |
 | FR-33 | Calendar export | P0 | Per-Event `.ics`; personal feed of registered Events at a secret URL that the user can reset |
-| FR-34 | Map view | P2 | Online only, configurable tile provider (C-16) |
+| FR-34 | Map view | P2 | Online only, configurable tile provider (review C-16) |
 
 ### 5.5 Registration and Gate Pass (`apps/tickets`)
 | ID | Requirement | Priority | Acceptance criteria |
@@ -120,7 +120,7 @@ Priority: P0 must ship in v1.0; P1 should ship; P2 is v1.1 or later.
 | NFR-04 | Security: OWASP ASVS 5.0 Level 2 as the target for v1.0, assessed per chapter in `04_THREAT_MODEL.md` |
 | NFR-05 | Privacy: data minimisation as in `05_DATA_PROTECTION.md`; no third-party scripts, fonts or telemetry loaded by default |
 | NFR-06 | Availability: deployment documentation for single-server operation with nightly encrypted backups and a tested restore |
-| NFR-07 | Internationalisation: all user-facing strings translatable; English complete; Kinyarwanda for attendee flows after review (C-17) |
+| NFR-07 | Internationalisation: all user-facing strings translatable; English complete; Kinyarwanda for attendee flows after review (review C-17) |
 | NFR-08 | Browser support: the two latest versions of Chrome, Firefox, Safari and Samsung Internet; the scanner requires camera access over HTTPS |
 
 ## 7. Required disclosures (exact text owned by the deployer)

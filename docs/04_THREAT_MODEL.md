@@ -88,7 +88,7 @@ Status: **Designed** means specified in this documentation; **Present** means it
 | ID | Threat | Control | Status |
 | :--- | :--- | :--- | :--- |
 | E-1 | Organizer of one Host acts on another Host's Events | Every Event view and service checks `HostRole` for the Event's Host; tests for each role and Host combination | Designed |
-| E-2 | Self-approval to bypass review | Allowed only for Approvers of the same Host, always audit-logged and shown to other Approvers (X-11) | Designed |
+| E-2 | Self-approval to bypass review | Allowed only for Approvers of the same Host, always audit-logged and shown to other Approvers (review X-11) | Designed |
 | E-3 | Django admin exposed to the internet | Admin restricted to `is_staff` with TOTP; deployment guide recommends restricting `/admin/` by network | Designed |
 | E-4 | Container breakout or host compromise | Non-root image; read-only filesystem where possible; minimal base image scanned in CI | Designed |
 

@@ -1,6 +1,6 @@
 # 02 — Architecture and Data Model (v1.0)
 
-Status: draft for v1.0. Governs implementation from milestone M1. Terms follow `GLOSSARY.md`; decisions D-nn and risks R-nn are in `00_DECISIONS_AND_AUDIT.md`.
+Status: draft for v1.0. Governs implementation from milestone M1. Terms follow `GLOSSARY.md`; risks (R-nn) are in `07_ROADMAP.md`; review IDs (C-nn, D-nn) are in `history/2026-10-23-review.md`.
 
 ## 1. Context
 
@@ -30,17 +30,17 @@ One codebase, two processes (web and worker), one stateful service (PostgreSQL).
 
 | Concern | Choice | Record |
 | :--- | :--- | :--- |
-| Language and runtime | Python 3.14 (`.python-version`) | D-15 |
+| Language and runtime | Python 3.14 (`.python-version`) | review D-15 |
 | Framework | Django 6.1, moving to 6.2 LTS when released | R-09 |
 | Database | PostgreSQL 17 in every environment | ADR-0006 |
 | UI | Django templates, HTMX, CSS custom properties from design tokens; no CSS framework required | ADR-0005 |
 | Offline | Service worker and IndexedDB in a PWA served by Django | ADR-0005 |
-| Authentication | `django-allauth`, email login, sessions, optional TOTP | D-13 |
+| Authentication | `django-allauth`, email login, sessions, optional TOTP | review D-13 |
 | API | Django REST Framework under `/api/v1/`, session auth with CSRF | `03_API_SPEC.md` |
 | API schema | `drf-spectacular` generating OpenAPI 3 at `/api/v1/schema/` | R-08 |
 | Background work | Django Tasks API, `django-tasks-db` backend, `db_worker` process | ADR-0007 |
 | Pass signatures | Ed25519 through `cryptography` | ADR-0002 |
-| QR rendering | `segno`, server-side SVG and PNG | D-21 |
+| QR rendering | `segno`, server-side SVG and PNG | review D-21 |
 | Calendar | `icalendar` | FR-33 |
 | Static files | `whitenoise` | |
 | App server | `gunicorn` | |
@@ -59,7 +59,7 @@ Each Django app owns its models. Other apps call its `services.py` (writes) and 
 | `apps.notifications` | Notification, Subscription, NotificationPreference, task definitions | events, tickets, accounts |
 | `apps.audit` | AuditEntry and `audit.record()` | none (others call it) |
 
-The empty `apps.community` app is removed (C-26). Import rules are checked in CI with an import-linter contract added in milestone M1.
+The empty `apps.community` app is removed (review C-26). Import rules are checked in CI with an import-linter contract added in milestone M1.
 
 ### 3.1 Extension points
 - `kamikon.eligibility.EligibilityPolicy`: the class that answers "may this user register, and in which Seat Pool". A deployment can subclass it through the setting `KAMIKON_ELIGIBILITY_POLICY`, for example to add a rule for a specific institution. The default implements §5.
@@ -290,7 +290,7 @@ Notes:
 - psycopg is LGPL-3.0. Importing it unmodified from Apache-2.0 code is permitted. Container images that bundle it must include its licence text, and users must remain able to replace it, which a normal Python installation allows. The release pipeline generates a third-party notices file from the SBOM (`06_CI_CD_AND_RELEASES.md` §4).
 - PostgreSQL itself runs as a separate service and is not distributed in the application image.
 - Frontend assets to add in M2 (HTMX, the Manrope and Noto Sans fonts, the QR decoding and Ed25519 libraries) were not licence-checked in this review. They are self-hosted, never loaded from a CDN, and checked before merge.
-- Not used in v1: Redis (licence change from 7.4, C-14), Celery, Django Channels, Firebase, Sentry, `djangorestframework-simplejwt`.
+- Not used in v1: Redis (licence change from 7.4, review C-14), Celery, Django Channels, Firebase, Sentry, `djangorestframework-simplejwt`.
 
 ## 10. Configuration
 

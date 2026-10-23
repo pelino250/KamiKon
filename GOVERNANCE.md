@@ -4,7 +4,7 @@
 
 KamiKon is maintainer-led. The project lead is Pelin Mutanguha (GitHub `pelino250`), who is currently the only maintainer. The lead decides on releases, roadmap and acceptance of ADRs, after discussion in the relevant issue or pull request.
 
-This is a known risk (R-03 in `docs/00_DECISIONS_AND_AUDIT.md`): the project needs a second maintainer before v1.0.
+This is a known risk (R-03 in `docs/07_ROADMAP.md`): the project needs a second maintainer before v1.0.
 
 ## 2. Roles
 
