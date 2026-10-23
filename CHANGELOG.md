@@ -7,6 +7,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 ## [Unreleased]
 
 ### Added
+- CI workflow with four jobs: `pre-commit` (Ruff, file hygiene, secrets), `checks` (lockfile, Django checks, Bandit, pip-audit), `test` (pytest on PostgreSQL 17) and `workflow-lint` (actionlint).
 - Apache License 2.0 (`LICENSE`, `NOTICE`).
 - Specifications for v1.0 in `docs/`: decisions and audit, product requirements, architecture and data model, interface specification, threat model, data protection guide for deployers, CI/CD and release process, roadmap.
 - Architecture decision records 0002 to 0011.
@@ -16,7 +17,6 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - `.python-version` pinning Python 3.14.
 
 ### Changed
-- CI runs as three GitHub Actions jobs with the commands written in the workflow: `pre-commit` (Ruff, file hygiene, secrets), `checks` (lockfile, Django checks, Bandit, pip-audit) and `test` (pytest on PostgreSQL 17). This replaces nine jobs that each called `scripts/ci.py`, three of which repeated checks pre-commit already ran.
 - `docs/00_DECISIONS_AND_AUDIT.md` moved to `docs/history/2026-10-23-review.md` as a dated record. The risk register and open questions moved to `docs/07_ROADMAP.md`. The README now sends readers to the PRD first.
 - `03_API_SPEC.md` defers to the generated OpenAPI schema once an endpoint exists; its table of changes from the earlier draft moved to the history file.
 - `requires-python` bounded to `>=3.14,<3.15`, because Django 6.1.2 does not yet support Python 3.15.
@@ -30,7 +30,6 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - NFR-03 now states the accessibility floor and blocking design checks directly; `design_docs/` stays private.
 
 ### Removed
-- `scripts/ci.py` and its tests.
 - `requirements.txt`; `uv.lock` is the single source of dependencies.
 - Empty `apps/*/tests.py` placeholders. pytest collects only from `tests/`, so tests written there would never run.
 - A compiled `.pyc` file that had been committed under `scripts/__pycache__/`.

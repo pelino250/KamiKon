@@ -168,3 +168,4 @@ These need answers from the maintainer or from partners. Nothing in the specific
 | Q-08 | Is the course cohort expected to contribute in this repository or in forks? | `docs/teaching/SPRINT_PLAYBOOK.md` |
 | Q-09 | Should the ID-photo review fallback for universities without student email be built in v1, given that it introduces image storage and moderation work? It is specified behind a feature flag, off by default. | M1 scope |
 | Q-10 | Trademark searches at the Rwanda Development Board and USPTO for "KamiKon": who performs them, and when? | v1.0 announcement |
+| Q-11 | The design tokens (colours, type, radii) are not published; they exist only in the maintainer's private design notes. Publish the values as `design/tokens.json`, and point US-0.1 and US-2.2 at that file. | M2-5 |
