@@ -1,10 +1,10 @@
-# 07 — Roadmap to v1.0
+# 07: Roadmap to v1.0
 
 Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `design_docs/PROJECT_README.md` for engineering purposes. Course cohorts map these milestones onto sprints using `docs/teaching/SPRINT_PLAYBOOK.md`. Dates are not set; each milestone ends when its exit criteria pass.
 
 ## 1. Milestones
 
-### M0 — Foundations
+### M0: Foundations
 | ID | Item | Exit criterion |
 | :--- | :--- | :--- |
 | M0-1 | Repository hygiene files (this change): LICENSE, CODE_OF_CONDUCT, SECURITY, CHANGELOG, GOVERNANCE, docs | Merged |
@@ -14,7 +14,7 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | M0-5 | Deploy check (`manage.py check --deploy`) in the `checks` job | In CI |
 | M0-6 | Move repository to a GitHub organisation with two owners | R-03 mitigated |
 
-### M1 — Institutions and identity
+### M1: Institutions and identity
 | ID | Item | Exit criterion |
 | :--- | :--- | :--- |
 | M1-1 | `apps.institutions` models and admin (FR-01 to FR-03) | Tests per constraint |
@@ -26,7 +26,7 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | M1-7 | CI: `imports`, `licenses`, `codeql`, `scorecard` | In CI |
 | M1-8 | Remove the empty `apps.community` | Merged |
 
-### M2 — Events and discovery
+### M2: Events and discovery
 | ID | Item | Exit criterion |
 | :--- | :--- | :--- |
 | M2-1 | Event, SeatPool, Tag models with all constraints in §4.3 | Constraint tests |
@@ -36,7 +36,7 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | M2-5 | Design tokens implemented as CSS custom properties from `design/tokens.json` | No colour literals outside token files; NFR-03 floor met |
 | M2-6 | Container image, Trivy, SBOM (`container` stage) | In CI |
 
-### M3 — Registration, Gate Pass and scanner
+### M3: Registration, Gate Pass and scanner
 | ID | Item | Exit criterion |
 | :--- | :--- | :--- |
 | M3-1 | Registration, waitlist, cancellation, promotion (FR-40 to FR-42) | Concurrency test: 500 parallel attempts, zero oversell |
@@ -47,10 +47,10 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | M3-6 | ADR for browser Ed25519 and QR decoding libraries (architecture §6.6) | Merged before M3-4 |
 | M3-7 | Pilot partner, if an institution is interested (R-01, R-02, Q-02) | Optional; v1.0 does not wait for one |
 
-### M4 — Notifications
+### M4: Notifications
 FR-50 to FR-54, SPF, DKIM and DMARC guidance, digest scheduling.
 
-### M5 — Hardening and release
+### M5: Hardening and release
 | ID | Item | Exit criterion |
 | :--- | :--- | :--- |
 | M5-1 | Load test on the reference deployment (NFR-01) | Results published in `docs/performance/` |

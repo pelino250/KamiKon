@@ -1,4 +1,4 @@
-# 03 — Interface Specification (v1.0)
+# 03: Interface Specification (v1.0)
 
 Status: draft for v1.0, written before the API exists. Once an endpoint is implemented, the OpenAPI document generated at `/api/v1/schema/` is the contract for it, and this file keeps only the conventions in §1 and the rate limits in §4. A pull request that changes an endpoint updates the schema; it changes this file only if it changes a convention.
 
@@ -40,7 +40,7 @@ Status: draft for v1.0, written before the API exists. Once an endpoint is imple
 
 ### 3.1 Events
 
-`GET /api/v1/events/` — published, upcoming Events.
+`GET /api/v1/events/`: published, upcoming Events.
 Query: `from`, `to` (dates), `host` (University or Hub `short_code`; repeatable), `delivery_mode`, `tag` (slug; repeatable), `eligible` (`true` to restrict to Events the caller can register for), `q` (search text).
 
 Response item:
@@ -68,13 +68,13 @@ Response item:
 ```
 The values above are fictional. `eligibility` is present only for signed-in callers. `reason` is one of `SIGN_IN_REQUIRED`, `EMAIL_NOT_CONFIRMED`, `NOT_VERIFIED_MEMBER`, `NOT_HOST_UNIVERSITY`, `NOT_HOST_CAMPUS`, `NO_GUEST_SEATS`, `EVENT_STARTED`, `EVENT_CANCELLED`, or null.
 
-`GET /api/v1/events/{slug}/` — the same object plus `abstract`, `speakers`, `organizer_label`, `gate_instructions`, `id_check_at_gate`, and `online_url` (only for callers with a `CONFIRMED` registration).
+`GET /api/v1/events/{slug}/`: the same object plus `abstract`, `speakers`, `organizer_label`, `gate_instructions`, `id_check_at_gate`, and `online_url` (only for callers with a `CONFIRMED` registration).
 
 There is no event-creation endpoint in v1: Organizers use the web forms. A write API is added with the first non-browser client.
 
 ### 3.2 Registrations
 
-`POST /api/v1/events/{slug}/registrations/` — register the caller. Body: `{"legal_name": "..."}`, required only when `id_check_at_gate` is true.
+`POST /api/v1/events/{slug}/registrations/`: register the caller. Body: `{"legal_name": "..."}`, required only when `id_check_at_gate` is true.
 Responses: `201` with a Registration; `200` with the existing one if the caller already holds a non-cancelled registration (F-15); `403` with `reason` as in §3.1; `409` when the Event has started or is cancelled.
 
 Registration object:
@@ -90,11 +90,11 @@ Registration object:
 ```
 `gate_pass` is null while `issue_gate_pass` is pending, for `WAITLISTED` and for `ONLINE` Events.
 
-`DELETE /api/v1/registrations/{public_id}/` — cancel own registration. `204`; `409` after Event start.
+`DELETE /api/v1/registrations/{public_id}/`: cancel own registration. `204`; `409` after Event start.
 
 ### 3.3 Passes
 
-`GET /api/v1/me/passes/?when=upcoming|past` — the caller's Gate Passes.
+`GET /api/v1/me/passes/?when=upcoming|past`: the caller's Gate Passes.
 ```json
 {
   "public_id": "01928f70-2c3d-7e4f-9a01-b2c3d4e5f6a7",
@@ -111,7 +111,7 @@ Registration object:
 
 ### 3.4 Public keys
 
-`GET /api/v1/pass-keys/` — anyone. Returns signing keys whose status is `ACTIVE` or `RETIRED`:
+`GET /api/v1/pass-keys/`: anyone. Returns signing keys whose status is `ACTIVE` or `RETIRED`:
 ```json
 {"keys": [{"key_id": 1, "alg": "Ed25519", "public_key": "base64url", "status": "ACTIVE"}]}
 ```
@@ -132,7 +132,7 @@ All scanner endpoints require the `GATE_STAFF` or `ORGANIZER` role on the Event'
 ```
 `roster` is present only when requested. Every roster download writes an audit entry (FR-61).
 
-`POST /api/v1/scanner/events/{slug}/scans/` — one online scan.
+`POST /api/v1/scanner/events/{slug}/scans/`: one online scan.
 Body: `{"client_scan_id": "uuid", "device_id": "string", "scanned_at": "...", "qr_payload": "KK1:..."}` or the same with `"code": "KK-7Q2M-X4HD"` instead of `qr_payload`.
 Response `200`:
 ```json
@@ -140,7 +140,7 @@ Response `200`:
 ```
 For `ALREADY_USED`, `first_used_at` is set. `holder` is omitted for `BAD_SIGNATURE`, `UNKNOWN_KEY` and `WRONG_EVENT`. A repeated `client_scan_id` returns the original response.
 
-`POST /api/v1/scanner/events/{slug}/scans/batch/` — offline queue upload. Body: `{"device_id": "...", "scans": [ ...up to 500 scan objects with "mode": "OFFLINE" and "local_result" ]}`. Response: one result per `client_scan_id`, including `is_conflict`. Idempotent.
+`POST /api/v1/scanner/events/{slug}/scans/batch/`: offline queue upload. Body: `{"device_id": "...", "scans": [ ...up to 500 scan objects with "mode": "OFFLINE" and "local_result" ]}`. Response: one result per `client_scan_id`, including `is_conflict`. Idempotent.
 
 ### 3.6 Notifications
 

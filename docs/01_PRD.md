@@ -1,4 +1,4 @@
-# 01 — Product Requirements (v1.0)
+# 01: Product Requirements (v1.0)
 
 Status: draft for v1.0. Risks (R-nn) and open questions (Q-nn) are in `07_ROADMAP.md`; review IDs (C-nn, D-nn) are in `history/2026-10-23-review.md`. Domain terms follow `GLOSSARY.md`.
 

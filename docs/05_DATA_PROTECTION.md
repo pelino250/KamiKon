@@ -1,4 +1,4 @@
-# 05 — Data Protection Guide for Deployers
+# 05: Data Protection Guide for Deployers
 
 Status: draft for v1.0. This is engineering documentation, not legal advice. Each deployer should have its data protection officer or counsel review it. Article numbers refer to Rwanda Law No. 058/2021 of 13/10/2021 relating to the protection of personal data and privacy, read on RwandaLII (https://rwandalii.org/akn/rw/act/law/2021/58/eng@2021-10-15) on 2026-10-23. Where a statement comes from a secondary summary, it is marked "(secondary)".
 

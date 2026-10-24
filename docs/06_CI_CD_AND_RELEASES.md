@@ -1,4 +1,4 @@
-# 06 — CI/CD, Supply Chain and Releases
+# 06: CI/CD, Supply Chain and Releases
 
 Status: the "Present" rows describe `.github/workflows/` as of 2026-10-23; everything else is planned with the milestone shown.
 

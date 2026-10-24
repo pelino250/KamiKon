@@ -1,4 +1,4 @@
-# 04 — Threat Model (STRIDE)
+# 04: Threat Model (STRIDE)
 
 Status: draft for v1.0. Review at every minor release and whenever a trust boundary changes. Architecture references are to `02_ARCHITECTURE.md`.
 

@@ -1,4 +1,4 @@
-# 02 — Architecture and Data Model (v1.0)
+# 02: Architecture and Data Model (v1.0)
 
 Status: draft for v1.0. Governs implementation from milestone M1. Terms follow `GLOSSARY.md`; risks (R-nn) are in `07_ROADMAP.md`; review IDs (C-nn, D-nn) are in `history/2026-10-23-review.md`.
 
