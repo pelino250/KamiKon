@@ -94,11 +94,11 @@ The worker service from M0-2 waits until M1-6 adds the Tasks backend.
 - **Board.** The KamiKon Delivery Board keeps its Status, Priority and Story Points fields. Remove the Mobile and SPA options from the Track field in the project settings (the API cannot edit options without clearing values).
 - **Labels.** GitHub recognises `good first issue`; the script deletes the duplicate `good-first-issue`.
 - **Generators.** `scripts/sprint_backlog.json` and `scripts/setup_github_project.py` describe the old sprint plan. Do not run them again; they would recreate the Sprint milestones and duplicate retitled issues.
-- **Tags.** `course-wN` tags mark the state of `main` at the end of each week. Students diff two tags to see one week's work.
+- **Tags.** `course-wN` tags mark the state of `main` at the end of each week. Students diff two tags to see one week's work. Product work merges in the same weeks, so filter by path to see only the course deliverable: `git diff course-w2 course-w3 -- Dockerfile compose.yaml k8s/ .github/`.
 
 ## 5. Branch protection for a single maintainer
 
-`06_CI_CD_AND_RELEASES.md` §3 requires one approving CODEOWNER review. With one maintainer, that blocks every merge, because GitHub does not let authors approve their own PRs. Until a second maintainer exists (R-03), the ruleset requires a PR and the checks `pre-commit`, `checks`, `test`, `workflow-lint` and `pr-title`, with zero required approvals. It also blocks force pushes and deletion and requires linear history. Raise approvals to one when Q-03 is answered.
+`06_CI_CD_AND_RELEASES.md` §3 requires one approving CODEOWNER review. With one maintainer, that blocks every merge, because GitHub does not let authors approve their own PRs. Until a second maintainer exists (R-03), the ruleset requires a PR and the checks `pre-commit`, `checks`, `test`, `workflow-lint` and `pr-title`, with zero required approvals. It also blocks force pushes and deletion and requires linear history. The ruleset accepts squash and rebase merges and rejects merge commits. Rebase merges put each small commit of a product slice on `main`, so learners can step through them. Branches open PRs straight into `main`, as the Week 1 and 2 slides teach; the repository has no `dev` branch. Raise approvals to one when Q-03 is answered.
 
 ## 6. Differences from the course examples
 

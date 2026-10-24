@@ -41,7 +41,8 @@ Configure a repository ruleset for `main`:
 - Require a pull request with one approving review from a CODEOWNER; dismiss stale approvals on new commits.
 - Require every "Required" check in §2 to pass, and require branches to be up to date.
 - Block force pushes and deletion.
-- Require linear history (squash merge only).
+- Require linear history: squash merge, or rebase merge when each commit in the PR is a step worth keeping. No merge commits.
+- No long-lived `dev` branch. Contributors work on short-lived branches and open PRs into `main` (trunk-based development). The protected `staging` environment gates production.
 - Require signed commits from maintainers (contributors are not required to sign).
 - Turn on secret scanning push protection and private vulnerability reporting in repository settings. Whether these are available on the current plan was not verified in this review; check the settings page.
 

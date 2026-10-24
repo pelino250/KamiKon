@@ -18,6 +18,7 @@ echo "== 0. Bring main up to date before branch protection blocks direct pushes"
 git push origin main
 gh pr merge 47 --repo "$R" --squash   # Dependabot setup-uv 10.3.1, all checks green
 git fetch origin main
+git push origin --delete dev   # stale; every commit is already in main (trunk-based, no dev branch)
 fi
 
 if [ 1 -ge "$FROM" ]; then
@@ -229,7 +230,7 @@ gh api "repos/$R/rulesets" --method POST --input - <<'EOF'
   ]
 }
 EOF
-gh api "repos/$R" --method PATCH -F allow_merge_commit=false -F allow_rebase_merge=false \
+gh api "repos/$R" --method PATCH -F allow_merge_commit=false -F allow_rebase_merge=true \
   -F allow_squash_merge=true -F delete_branch_on_merge=true --silent
 fi
 
