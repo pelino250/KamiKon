@@ -4,6 +4,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.institutions.models import Campus, EmailDomain, HostRole, Hub, University, Venue
+from apps.institutions.services import grant_host_role
 
 # Fictional institutions on example.org domains only (FR-04, Q-05). Never add real ones here.
 UNIVERSITIES = {
@@ -69,7 +70,8 @@ class Command(BaseCommand):
             if user is None:
                 # No password; set one with `manage.py changepassword <email>`.
                 user = users.create_user(email, display_name=display_name)
-            HostRole.objects.get_or_create(user=user, role=role, **hosts[host])
+            if not HostRole.objects.filter(user=user, role=role, **hosts[host]).exists():
+                grant_host_role(HostRole(user=user, role=role, **hosts[host]))
 
         self.stdout.write(
             self.style.SUCCESS(f"Seeded {len(hosts)} Hosts and {len(STAFF)} staff users.")
