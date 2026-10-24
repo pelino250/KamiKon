@@ -21,6 +21,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - `manage.py seed_demo` creates synthetic institutions, Venues and staff users (M1-2).
 - `apps.audit`: an append-only audit log. Granting or revoking a Host role writes an entry (M1-5, FR-03).
 - `apps.events`: Event, Seat Pool and Tag models with the constraints in architecture §4.3 (M2-1).
+- A home page built from a shared base template, with translatable strings and self-hosted CSS.
 
 ### Changed
 - The database connection skips TLS for local hosts and Unix sockets and still requires it for remote hosts.

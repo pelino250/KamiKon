@@ -1,0 +1,20 @@
+/* Colour tokens. Until design/tokens.json lands (M2-5), keep every colour here. */
+:root {
+  --bg-canvas: #f5f7fa;
+  --bg-surface: #ffffff;
+  --border-hairline: #d5dbe5;
+  --text-primary: #0b1220;
+  --action: #1b3a6b;
+  --on-action: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-canvas: #0a0f1a;
+    --bg-surface: #121a29;
+    --border-hairline: #25304a;
+    --text-primary: #eaf0fa;
+    --action: #7fa6e8;
+    --on-action: #0a0f1a;
+  }
+}

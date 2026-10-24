@@ -1,0 +1,27 @@
+{% load i18n static %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}KamiKon{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+  <a class="skip-link" href="#main">{% translate "Skip to content" %}</a>
+  <header class="site-header">
+    <nav aria-label="{% translate 'Main' %}">
+      <a class="brand" href="{% url 'home' %}">KamiKon</a>
+    </nav>
+  </header>
+  {% if messages %}
+  <div class="messages" role="status">
+    {% for message in messages %}<p class="message message-{{ message.tags }}">{{ message }}</p>{% endfor %}
+  </div>
+  {% endif %}
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
