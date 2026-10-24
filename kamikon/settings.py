@@ -72,7 +72,6 @@ INSTALLED_APPS = [
     "apps.events",
     "apps.notifications",
     "apps.tickets",
-    "apps.community",
 ]
 
 MIDDLEWARE = [
