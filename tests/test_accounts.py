@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import authenticate, get_user_model
 from django.db import IntegrityError
+from django.urls import reverse
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -24,3 +25,10 @@ def test_public_id_is_uuid7_and_calendar_token_resets():
     old = user.calendar_token
     user.reset_calendar_token()
     assert user.calendar_token != old
+
+
+def test_superuser_can_open_the_user_admin(client):
+    admin = User.objects.create_superuser("admin@example.org", PASSWORD)
+    client.force_login(admin)
+    assert client.get(reverse("admin:accounts_user_changelist"), secure=True).status_code == 200
+    assert client.get(reverse("admin:accounts_user_add"), secure=True).status_code == 200
