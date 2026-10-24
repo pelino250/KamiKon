@@ -12,8 +12,8 @@ Agile Scrum board for **KamiKon** (*Kaminuza + Connect*), an inter-university ac
 | 3 | RSVP Engine, Inter-University QR Gate Pass & Calendar Sync | 2 weeks |
 | 4 | Smart Notifications, Real-Time Alerts & Background Workers | 2 weeks |
 | 5 | Hardening, Load Testing & Phase 1/2 Release | 2 weeks |
-| 6 | Phase 3: Flutter Mobile App & Push Notifications | 3 weeks |
-| 7 | Phase 4: Component-Based SPA in React or Angular | 3 weeks |
+| 6 | Post-v1 (ADR-0005): Flutter Mobile App & Push Notifications | 3 weeks |
+| 7 | Post-v1 (ADR-0005): Component-Based SPA in React or Angular | 3 weeks |
 
 ## Columns (Status)
 

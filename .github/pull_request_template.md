@@ -15,8 +15,6 @@ Closes #<!-- issue number -->
 - [ ] Backend (Django/API)
 - [ ] Frontend (UI/UX)
 - [ ] DevOps & Infra
-- [ ] Mobile (Flutter)
-- [ ] SPA (React/Angular)
 
 ## How Has This Been Tested?
 <!-- Commands you ran, test cases added, manual steps. -->
