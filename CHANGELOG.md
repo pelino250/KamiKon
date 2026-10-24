@@ -19,6 +19,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - Email sign-in: the user model has no username, a case-insensitive unique email, a UUIDv7 `public_id` and a resettable calendar token (M0-4).
 - `apps.institutions`: Universities, email domains, Campuses, Hubs, Venues and Host roles, managed in the admin (M1-1).
 - `manage.py seed_demo` creates synthetic institutions, Venues and staff users (M1-2).
+- `apps.audit`: an append-only audit log. Granting or revoking a Host role writes an entry (M1-5, FR-03).
 
 ### Changed
 - The database connection skips TLS for local hosts and Unix sockets and still requires it for remote hosts.

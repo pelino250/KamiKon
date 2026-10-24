@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.db import transaction
 
 from .models import Campus, EmailDomain, HostRole, Hub, University, Venue
+from .services import grant_host_role, revoke_host_role
 
 
 class EmailDomainInline(admin.TabularInline):
@@ -44,7 +46,20 @@ class HostRoleAdmin(admin.ModelAdmin):
     autocomplete_fields = ("user",)
     readonly_fields = ("granted_by", "granted_at")
 
+    def get_readonly_fields(self, request, obj=None):
+        # A change would be an unaudited revoke and grant; delete and add instead.
+        if obj:
+            return ("user", "campus", "hub", "role", *self.readonly_fields)
+        return self.readonly_fields
+
     def save_model(self, request, obj, form, change):
         if not change:
-            obj.granted_by = request.user
-        super().save_model(request, obj, form, change)
+            grant_host_role(obj, granted_by=request.user)
+
+    def delete_model(self, request, obj):
+        revoke_host_role(obj, revoked_by=request.user)
+
+    @transaction.atomic
+    def delete_queryset(self, request, queryset):
+        for host_role in queryset:
+            revoke_host_role(host_role, revoked_by=request.user)
