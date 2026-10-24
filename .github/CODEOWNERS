@@ -12,13 +12,16 @@
 /.github/               @pelino250
 /scripts/               @pelino250
 
-# Backend: Django (Sprints 0–5)
+# Backend: Django
 /kamikon/               @pelino250
 /apps/                  @pelino250
 /tests/                 @pelino250
 
-# DevOps: Docker and Compose files, CI workflows
-/docker-compose*.yml    @pelino250
+# DevOps: Docker and Compose files, CI workflows, teaching infrastructure (ADR-0012)
+/compose*.yaml          @pelino250
+/k8s/                   @pelino250
+/terraform/             @pelino250
+/ansible/               @pelino250
 **/Dockerfile           @pelino250
 /.github/workflows/     @pelino250
 

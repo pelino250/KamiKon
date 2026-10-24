@@ -78,5 +78,5 @@ Workflow permissions are least-privilege per job: `contents: read` by default, a
 ## 7. Environments and deployment
 
 - Development: Docker Compose (`web`, `worker`, `db`, `mailpit`), M0.
-- Staging: optional, for maintainers and course cohorts. It must use synthetic data only unless it meets `05_DATA_PROTECTION.md` §4 (review C-15).
+- Staging: optional, for maintainers and course cohorts. It must use synthetic data only unless it meets `05_DATA_PROTECTION.md` §4 (review C-15). The reference staging is defined by `terraform/` and `ansible/` (ADR-0012).
 - Production: the project does not run one. Deployers follow the deployment guide added in M5, which covers the Compose production example, reverse proxy and TLS, backups and restore, upgrades (`migrate` before switching traffic), and key management.
