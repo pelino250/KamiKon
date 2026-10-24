@@ -17,10 +17,12 @@ PROD_ENV = {
 }
 
 
-def load_settings(**env):
+def load_settings(code=None, **env):
     # A clean environment, so a developer's own .env values do not leak in.
     clean = {k: v for k, v in os.environ.items() if k in {"PATH", "HOME"}}
-    code = "import kamikon.settings as s; print(s.SECURE_SSL_REDIRECT, s.SESSION_COOKIE_SECURE)"
+    code = code or (
+        "import kamikon.settings as s; print(s.SECURE_SSL_REDIRECT, s.SESSION_COOKIE_SECURE)"
+    )
     return subprocess.run(
         [sys.executable, "-c", code],
         cwd=ROOT,
@@ -62,3 +64,16 @@ def test_missing_database_setting_is_rejected_in_production():
     env = {k: v for k, v in PROD_ENV.items() if k != "DB_PASSWORD"}
     result = load_settings(**env)
     assert "ImproperlyConfigured" in result.stderr
+
+
+SSLMODE = "import kamikon.settings as s; print(s.DATABASES['default']['OPTIONS']['sslmode'])"
+
+
+def test_local_database_host_does_not_require_tls():
+    result = load_settings(SSLMODE, **PROD_ENV)
+    assert result.stdout.strip() == "prefer", result.stderr
+
+
+def test_remote_database_host_requires_tls():
+    result = load_settings(SSLMODE, **{**PROD_ENV, "DB_HOST": "db.example.org"})
+    assert result.stdout.strip() == "require", result.stderr
