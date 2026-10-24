@@ -2,6 +2,8 @@
 
 Agile Scrum board for **KamiKon** (*Kaminuza + Connect*), an inter-university academic event discovery, RSVP and QR gate-pass platform for Rwandan campuses.
 
+Superseded: the course weeks in `docs/teaching/COURSE_ALIGNMENT.md` replace this sprint plan. Do not rerun `setup_github_project.py`; it would recreate the Sprint milestones.
+
 ## Sprint Plan
 
 | Sprint | Theme | Length |

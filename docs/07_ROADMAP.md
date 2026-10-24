@@ -1,6 +1,6 @@
 # 07: Roadmap to v1.0
 
-Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `design_docs/PROJECT_README.md` for engineering purposes. Course cohorts map these milestones onto sprints using `docs/teaching/SPRINT_PLAYBOOK.md`. Dates are not set; each milestone ends when its exit criteria pass.
+Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `design_docs/PROJECT_README.md` for engineering purposes. Course cohorts map these milestones onto sprints using `docs/teaching/SPRINT_PLAYBOOK.md`; the Advanced DevOps course follows `docs/teaching/COURSE_ALIGNMENT.md` instead. Dates are not set; each milestone ends when its exit criteria pass.
 
 ## 1. Milestones
 
@@ -95,7 +95,7 @@ Each of these is small, documented, and touches a single module. Label them `goo
 | Events and discovery | `apps/events`, `apps/discovery` | Filters and templates |
 | Passes and scanning | `apps/tickets`, `static/pwa/` | Pass format test vectors |
 | Notifications | `apps/notifications`, `templates/email/` | Email templates |
-| DevOps | `.github/`, `scripts/`, `docker/`, `compose*.yaml` | CI workflow |
+| DevOps | `.github/`, `scripts/`, `docker/`, `compose*.yaml`, `k8s/`, `terraform/`, `ansible/` | CI workflow |
 
 ## 6. Bus factor and maintenance
 
@@ -124,7 +124,7 @@ The 29 open GitHub issues were created from `scripts/sprint_backlog.json`. Apply
 | US-3.1 to US-3.3 | Rewrite to M3-1 to M3-5; remove "Student ID number" and HMAC from criteria | review C-01, review C-06 |
 | DO-3.4 | Rewrite: staging on synthetic data only | review C-15 |
 | US-4.1, US-4.2 | Keep within M4; email and in-app only | review C-14 |
-| DO-4.3 | Reduce to health endpoints and structured logs in v1; Prometheus and Grafana post-v1 | Scope |
+| DO-4.3 | Reduce to health endpoints and structured logs in v1; Prometheus and Grafana on staging only (ADR-0012) | Scope |
 | US-5.1 | Replace with database query optimisation and per-view caching only if NFR-01 fails | No Redis in v1 |
 | DO-5.2, DO-5.3 | Keep as M5-1 and M5-3 | |
 | US-6.x, DO-6.4, US-7.x, DO-7.3 | Label `post-v1`, remove milestones | review D-03 |
@@ -147,7 +147,7 @@ Likelihood and impact are rated Low, Medium or High. A gate is the point in the 
 | R-09 | Django 6.1 extended support ends December 2027 | Certain | Medium | Move to Django 6.2 LTS (due April 2027, extended support to April 2030) before or at v1.0 | v1.0 |
 | R-10 | Name conflict: "Kami-Con" is an anime convention running since 2009 in Alabama; "Kami" is used by other products | Low | Medium | Search the Rwanda Development Board and USPTO registers before the v1.0 announcement; keep the domain and organisation names consistent | Before v1.0 announcement |
 | R-11 | Email domain list is wrong or incomplete (shared domains, alumni domains) | High | Medium | Domains are seeded only after confirmation by the institution; Platform Admin can mark a domain as staff-only or alumni | M1 |
-| R-12 | Scope creep back to four frontends, maps, wallet and community features | High | High | Roadmap lists them as post-v1; issues for them are labelled `post-v1` and closed from milestones | Every milestone review |
+| R-12 | Scope creep back to four frontends, maps, wallet and community features | High | High | Roadmap lists them as post-v1; issues for them are labelled `post-v1` and closed from milestones. Teaching infrastructure under ADR-0012 adds no runtime service to the product | Every milestone review |
 | R-13 | Personal data enters the repository through fixtures, screenshots or issue reports | Medium | High | Seed data is synthetic and generated; issue templates warn; detect-secrets and review | Continuous |
 | R-14 | Kinyarwanda translation quality on gate messages | Medium | Medium | Fluent reviewer signs off on attendee strings; gate strings tested first | Before v1.0 |
 | R-15 | Mass email from a deployment marked as spam, so urgent changes are missed | Medium | Medium | Document SPF, DKIM and DMARC setup; in-app notification list as a second channel | M4 |
@@ -165,7 +165,7 @@ These need answers from the maintainer or from partners. Nothing in the specific
 | Q-05 | Which email domains are confirmed by which institutions? None may be seeded until confirmed. | M1 seed data |
 | Q-06 | Who reviews the Kinyarwanda strings? | v1.0 Kinyarwanda |
 | Q-07 | Will the project run a public demo? If yes, who hosts it and under whose name (it must stay synthetic-only, ADR-0010)? | Demo |
-| Q-08 | Is the course cohort expected to contribute in this repository or in forks? | `docs/teaching/SPRINT_PLAYBOOK.md` |
+| Q-08 | Is the course cohort expected to contribute in this repository or in forks? Answered for the Advanced DevOps course: neither; KamiKon is the instructor's reference repository (`docs/teaching/COURSE_ALIGNMENT.md`). Open for future cohorts. | `docs/teaching/SPRINT_PLAYBOOK.md` |
 | Q-09 | Should the ID-photo review fallback for universities without student email be built in v1, given that it introduces image storage and moderation work? It is specified behind a feature flag, off by default. | M1 scope |
 | Q-10 | Trademark searches at the Rwanda Development Board and USPTO for "KamiKon": who performs them, and when? | v1.0 announcement |
 | Q-11 | The design tokens (colours, type, radii) are not published; they exist only in the maintainer's private design notes. Publish the values as `design/tokens.json`, and point US-0.1 and US-2.2 at that file. | M2-5 |

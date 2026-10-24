@@ -41,7 +41,8 @@ Configure a repository ruleset for `main`:
 - Require a pull request with one approving review from a CODEOWNER; dismiss stale approvals on new commits.
 - Require every "Required" check in §2 to pass, and require branches to be up to date.
 - Block force pushes and deletion.
-- Require linear history (squash merge only).
+- Require linear history: squash merge, or rebase merge when each commit in the PR is a step worth keeping. No merge commits.
+- No long-lived `dev` branch. Contributors work on short-lived branches and open PRs into `main` (trunk-based development). The protected `staging` environment gates production.
 - Require signed commits from maintainers (contributors are not required to sign).
 - Turn on secret scanning push protection and private vulnerability reporting in repository settings. Whether these are available on the current plan was not verified in this review; check the settings page.
 
@@ -78,5 +79,5 @@ Workflow permissions are least-privilege per job: `contents: read` by default, a
 ## 7. Environments and deployment
 
 - Development: Docker Compose (`web`, `worker`, `db`, `mailpit`), M0.
-- Staging: optional, for maintainers and course cohorts. It must use synthetic data only unless it meets `05_DATA_PROTECTION.md` §4 (review C-15).
+- Staging: optional, for maintainers and course cohorts. It must use synthetic data only unless it meets `05_DATA_PROTECTION.md` §4 (review C-15). The reference staging is defined by `terraform/` and `ansible/` (ADR-0012).
 - Production: the project does not run one. Deployers follow the deployment guide added in M5, which covers the Compose production example, reverse proxy and TLS, backups and restore, upgrades (`migrate` before switching traffic), and key management.

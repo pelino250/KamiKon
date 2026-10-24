@@ -63,7 +63,7 @@ The other CI steps (Django checks, Bandit, pip-audit, lockfile) are listed in `.
 - Add an entry under "Unreleased" in `CHANGELOG.md` for user-visible changes.
 - New runtime dependencies need the justification described in `docs/06_CI_CD_AND_RELEASES.md` §6.
 - Never commit secrets, real personal data, or screenshots that show real people's data. Use the synthetic seed data.
-- A maintainer or CODEOWNER review is required. PRs are squash-merged.
+- A maintainer or CODEOWNER review is required. Maintainers squash-merge PRs, or rebase-merge them when each commit is a step learners should follow.
 
 ## 6. Issues and labels
 

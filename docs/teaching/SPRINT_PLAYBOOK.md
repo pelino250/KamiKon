@@ -1,6 +1,6 @@
 # Sprint Playbook for Course Cohorts
 
-This playbook applies to students working on KamiKon as part of a course. Everyone else follows `CONTRIBUTING.md` only. Where the two differ, `CONTRIBUTING.md` governs what is merged into the main repository; this playbook governs how a cohort organises its work.
+This playbook applies to students working on KamiKon as part of a course. The Advanced DevOps course does not use it: there KamiKon is the instructor's reference repository, planned in `COURSE_ALIGNMENT.md`. Everyone else follows `CONTRIBUTING.md` only. Where the two differ, `CONTRIBUTING.md` governs what is merged into the main repository; this playbook governs how a cohort organises its work.
 
 ## 1. Cadence
 
@@ -19,12 +19,12 @@ Hardening (M5) and post-v1 tracks (Flutter, SPA) are suitable for a following te
 
 ## 2. Board
 
-Work is tracked on the KamiKon Delivery Board (GitHub Projects), generated from `scripts/sprint_backlog.json` by `scripts/setup_github_project.py`.
+Work is tracked on the KamiKon Delivery Board (GitHub Projects). It was first generated from `scripts/sprint_backlog.json` by `scripts/setup_github_project.py`; do not rerun them (`COURSE_ALIGNMENT.md` §4).
 
 | Field | Values |
 | :--- | :--- |
 | Status | Backlog, Ready for Sprint, In Progress, In Review (PR Open), QA / Staging Verified, Done |
-| Track | Backend (Django/API), Frontend (UI/UX), DevOps & Infra, Mobile (Flutter), SPA (React/Angular) |
+| Track | Backend (Django/API), Frontend (UI/UX), DevOps & Infra |
 | Priority | P0 - Critical, P1 - High, P2 - Medium, P3 - Nice to Have |
 | Story Points | 1, 2, 3, 5, 8 (split anything larger than 8) |
 | Sprint | Iteration field |
