@@ -16,8 +16,12 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - Course-cohort process in `docs/teaching/SPRINT_PLAYBOOK.md`.
 - Feature request issue template.
 - `.python-version` pinning Python 3.14.
+- Email sign-in: the user model has no username, a case-insensitive unique email, a UUIDv7 `public_id` and a resettable calendar token (M0-4).
+- `apps.institutions`: Universities, email domains, Campuses, Hubs, Venues and Host roles, managed in the admin (M1-1).
+- `manage.py seed_demo` creates synthetic institutions, Venues and staff users (M1-2).
 
 ### Changed
+- The database connection skips TLS for local hosts and Unix sockets and still requires it for remote hosts.
 - README, PRD and roadmap state that KamiKon is primarily a teaching project. Pilot partners are optional, and no milestone or release criterion waits for one.
 - `docs/00_DECISIONS_AND_AUDIT.md` moved to `docs/history/2026-10-23-review.md` as a dated record. The risk register and open questions moved to `docs/07_ROADMAP.md`. The README now sends readers to the PRD first.
 - `03_API_SPEC.md` defers to the generated OpenAPI schema once an endpoint exists; its table of changes from the earlier draft moved to the history file.
@@ -32,6 +36,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - NFR-03 now states the accessibility floor and blocking design checks directly; `design_docs/` stays private.
 
 ### Removed
+- The empty `apps.community` app (M1-8).
 - `requirements.txt`; `uv.lock` is the single source of dependencies.
 - Empty `apps/*/tests.py` placeholders. pytest collects only from `tests/`, so tests written there would never run.
 - A compiled `.pyc` file that had been committed under `scripts/__pycache__/`.
