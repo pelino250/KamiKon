@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
+from django.urls import reverse
 
 from apps.institutions.models import Campus, EmailDomain, HostRole, Hub, University, Venue
 
@@ -50,3 +51,16 @@ def test_host_role_is_unique_per_user_host_and_role(campus):
     HostRole.objects.create(user=user, campus=campus, role="APPROVER")
     with pytest.raises(IntegrityError):
         HostRole.objects.create(user=user, campus=campus, role="ORGANIZER")
+
+
+def test_admin_records_who_granted_a_host_role(client, campus):
+    admin = get_user_model().objects.create_superuser("admin@example.org")
+    organizer = get_user_model().objects.create_user("organizer@example.org")
+    client.force_login(admin)
+    url = reverse("admin:institutions_hostrole_add")
+    data = {"user": organizer.pk, "campus": campus.pk, "role": "ORGANIZER"}
+    assert client.post(url, data, secure=True).status_code == 302
+    assert HostRole.objects.get().granted_by == admin
+    for model in ("university", "campus", "hub", "venue", "hostrole"):
+        url = reverse(f"admin:institutions_{model}_changelist")
+        assert client.get(url, secure=True).status_code == 200
