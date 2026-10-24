@@ -20,6 +20,7 @@ cd KamiKon
 uv sync --locked
 cp .env.example .env          # DEBUG=True; a development SECRET_KEY is used when blank
 uv run python manage.py migrate
+uv run python manage.py seed_demo   # synthetic institutions, Venues and staff users
 uv run python manage.py runserver
 ```
 
