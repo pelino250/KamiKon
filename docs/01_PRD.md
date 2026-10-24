@@ -23,6 +23,8 @@ Academic events at one Rwandan university are hard to find for students and staf
 
 ## 4. Goals and non-goals
 
+KamiKon is primarily a teaching project (see `README.md`). The goals below define production quality for the software; none of them depends on an institution adopting it.
+
 ### Goals for v1.0
 - G-1. A person can find an Event they are eligible for and register in under two minutes on a mid-range phone on a mobile connection.
 - G-2. An Organizer can publish an Event with an Access Policy, a Delivery Mode and Seat Pools without help.
@@ -132,7 +134,7 @@ The product must show, at the point of collection:
 
 ## 8. Success metrics
 
-Metrics to measure in the pilot: time from opening the list to completed registration; share of started registrations completed; share of Gate Pass scans that return a result in under two seconds; share of attendees scanned rather than checked manually; number of Events published per Host per month. Targets are to be agreed with pilot partners (Q-02).
+If an institution pilots KamiKon, measure: time from opening the list to completed registration; share of started registrations completed; share of Gate Pass scans that return a result in under two seconds; share of attendees scanned rather than checked manually; number of Events published per Host per month. Targets are agreed with the pilot institution (Q-02). Without a pilot, v1.0 is judged by the goals in §4 and the release criteria.
 
 ## 9. Release criteria for v1.0
 

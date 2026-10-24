@@ -4,6 +4,8 @@ KamiKon (*Kaminuza* + *Connect*) is an open-source platform on which universitie
 
 **Status: pre-alpha.** The repository contains the project skeleton, CI, and the v1.0 specifications. No user-facing feature is implemented yet. Do not deploy it with real users.
 
+KamiKon is first a teaching project: course cohorts build it as a real open-source codebase, with production-grade CI, security and data protection. An institution may adopt it later if there is interest, and the design keeps that possible, but no milestone waits for an adopter.
+
 ## Why
 
 Academic events at one university are hard to find for students and staff at another, and for alumni and industry. When visitors do come, gates often have no list of who is expected. KamiKon combines three things general event platforms do not: eligibility across institutions (verified university affiliation and four Access Policies), separate seat pools for host members, visiting members and the public, and a signed gate pass that works offline. It is designed to be self-hosted, so an institution can keep personal data in Rwanda.

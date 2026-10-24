@@ -18,6 +18,7 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 - `.python-version` pinning Python 3.14.
 
 ### Changed
+- README, PRD and roadmap state that KamiKon is primarily a teaching project. Pilot partners are optional, and no milestone or release criterion waits for one.
 - `docs/00_DECISIONS_AND_AUDIT.md` moved to `docs/history/2026-10-23-review.md` as a dated record. The risk register and open questions moved to `docs/07_ROADMAP.md`. The README now sends readers to the PRD first.
 - `03_API_SPEC.md` defers to the generated OpenAPI schema once an endpoint exists; its table of changes from the earlier draft moved to the history file.
 - `requires-python` bounded to `>=3.14,<3.15`, because Django 6.1.2 does not yet support Python 3.15.

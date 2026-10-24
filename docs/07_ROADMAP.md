@@ -45,7 +45,7 @@ Status: replaces the sprint plan in `design_docs/agile_devops_roadmap.md` and `d
 | M3-4 | Scanner PWA with bundle, online and offline scans, batch upload, conflicts (FR-45 to FR-47) | Playwright test of the offline path |
 | M3-5 | Roster export (FR-48) | Audit entry per export |
 | M3-6 | ADR for browser Ed25519 and QR decoding libraries (architecture §6.6) | Merged before M3-4 |
-| M3-7 | Pilot partner confirmed (R-01, R-02, Q-02) | Named partner; otherwise follow the fallback in `history/2026-10-23-review.md` §6 |
+| M3-7 | Pilot partner, if an institution is interested (R-01, R-02, Q-02) | Optional; v1.0 does not wait for one |
 
 ### M4 — Notifications
 FR-50 to FR-54, SPF, DKIM and DMARC guidance, digest scheduling.
@@ -72,7 +72,7 @@ Each starts only after v1.0 and with its own ADR: map view (v1.1); a native clie
 3. NFR-01 to NFR-08 are measured and the results published.
 4. The ASVS self-assessment has no open failure rated high.
 5. The README quick start works on a clean machine in under 10 minutes.
-6. The deployment guide and `05_DATA_PROTECTION.md` have been read by at least one pilot deployer, and their questions have been answered in the documents.
+6. A test deployment on synthetic data has followed the deployment guide and `05_DATA_PROTECTION.md` from start to finish; if a pilot deployer exists, their questions have been answered in the documents.
 7. Two maintainers with publishing rights exist (R-03).
 8. The release is signed and attested, and the changelog is complete.
 
@@ -136,8 +136,8 @@ Likelihood and impact are rated Low, Medium or High. A gate is the point in the 
 
 | ID | Risk | Likelihood | Impact | Mitigation | Gate |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| R-01 | No institution adopts it; the platform has no events and no users | High | High | Recruit one university office and one Hub as pilot partners before building registration; define success metrics with them (Q-02) | Before M3 starts |
-| R-02 | Campus security does not accept KamiKon passes, so the gate pass has no value | Medium | High | Pilot with a named security office; the roster export works even without scanning | Before M3 ends |
+| R-01 | No institution adopts it | High | Low for the teaching goal; High for real use | Keep it a complete teaching codebase; when an institution shows interest, define a pilot and success metrics with it (Q-02) | When an institution shows interest |
+| R-02 | Campus security does not accept KamiKon passes, so the gate pass has no value | Medium | High | Pilot with a named security office; the roster export works even without scanning | Before any deployment with real users |
 | R-03 | Bus factor of one: the maintainer becomes unavailable | High | High | Move the repository to a GitHub organisation with a second owner; document release and key procedures; appoint a second maintainer before v1.0 | Before v1.0 |
 | R-04 | Signing key leaked or lost | Low | High | Key only on the server, loaded from a secret file; key ID in every pass; rotation and revocation runbook; tests that scanners reject unknown key IDs | Before M3 ends |
 | R-05 | Duplicate entry through offline scanning | Medium | Medium | Online-first scanning; post-sync conflict report; single-device mode documented for strict gates | Before M3 ends |
@@ -160,7 +160,7 @@ These need answers from the maintainer or from partners. Nothing in the specific
 | ID | Question | Blocks |
 | :--- | :--- | :--- |
 | Q-01 | The project brief's one-line description was left unfilled. Confirm the README one-liner, which is taken from the existing README. | README |
-| Q-02 | Which institution and which Hub will pilot, and what success metrics and targets will they accept (time to find an event, registration completion, share of passes scanned successfully at the gate)? | M3, PRD success metrics |
+| Q-02 | Which institution and which Hub will pilot, and what success metrics and targets will they accept (time to find an event, registration completion, share of passes scanned successfully at the gate)? | A pilot, if one happens |
 | Q-03 | Who is the second maintainer or organisation owner? | v1.0 (R-03) |
 | Q-05 | Which email domains are confirmed by which institutions? None may be seeded until confirmed. | M1 seed data |
 | Q-06 | Who reviews the Kinyarwanda strings? | v1.0 Kinyarwanda |
